@@ -1,1 +1,7 @@
 *.pyc
+
+*.mp3
+
+
+Mash-Up/
+pydub/
