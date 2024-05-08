@@ -40,9 +40,12 @@ def get_mixability(song1, song2):
     if song1 not in mixability:
         mixability[song1] = {}
     if song2 not in mixability[song1]:
-        m = mashup.Mixer(song1, song2)
-        m.load_songs()
-        m.analyse()
+        try:
+            m = mashup.Mixer(song1, song2)
+            m.load_songs()
+            m.analyse()
+        except:
+            pass
         mixability[song1][song2] = m.mixability
 
         with open("data/mixability", "w") as f:
@@ -51,29 +54,7 @@ def get_mixability(song1, song2):
     return mixability[song1][song2]
 
 
-scores = []
-
-for s1 in songs:
-    for s2 in songs:
-        if s1 != s2:
-            m = get_mixability(s1, s2)
-            if m > 0:
-                scores.append((s1, s2, m))
-                print(scores[-1])
-
-scores.sort(key=lambda i: i[2])
-
-for i, s in enumerate(scores[:5]):
-    m = mashup.Mixer(s[0], s[1])
-    m.load_songs()
-    m.analyse()
-    m.mix(True)
-    m.export(f"out/worst{i + 1}.mp3")
-
-for i, s in enumerate(scores[-5:]):
-    m = mashup.Mixer(s[0], s[1])
-    m.load_songs()
-    m.analyse()
-    m.mix(True)
-    m.export(f"out/best{5 - i}.mp3")
-
+for (i, s1) in enumerate(songs):
+    for (j, s2) in enumerate(songs):
+        print(f"{1 + i * len(songs) + j} / {len(songs) ** 2}")
+        get_mixability(s1, s2)
