@@ -1,56 +1,51 @@
+import json
 import random
 from time import sleep
 from just_playback import Playback
+
+songdata = {}
+with open("out/data.json") as f:
+    for line in f:
+        data = json.loads(line)
+        if data["song1"] not in songdata:
+            songdata[data["song1"]] = []
+        songdata[data["song1"]].append(data)
 
 ch0 = Playback()
 ch1 = Playback()
 ch2 = Playback()
 
-ch0.load_file("music/03 - Heroes.mp3")
-ch1.load_file("music/03 - Heroes.mp3")
-
 ch2.load_file("keyboard-sounds/DJ.wav")
 
+current = random.choice(random.choice(list(songdata.values())))
+next = None
 
+current_channel = 0
+ch0.load_file(current["filename"])
 ch0.play()
 
-for i in range(10):
+
+while True:
+    if random.random() > 0.99:
+        ch2.play()
+
+    if current_channel == 0:
+        playing = ch0
+        queued = ch1
+    else:
+        playing = ch1
+        queued = ch0
+
+    if next is None:
+        next = random.choice(songdata[current["song2"]])
+        queued.load_file(next["filename"])
+
+    if playing.curr_pos > current["fade_end"]:
+        queued.play()
+        queued.seek(current["song2_fade_end"] + playing.curr_pos - current["fade_end"])
+        playing.pause()
+        current_channel = 1 - current_channel
+        current = next
+        next = None
+
     sleep(1)
-    sleep(1)
-    ch2.play()
-    ch1.play()
-    ch1.seek(ch0.curr_pos)
-    ch0.pause()
-    sleep(1)
-    ch2.play()
-    ch0.play()
-    ch0.seek(ch1.curr_pos)
-    ch1.pause()
-"""
-
-import pygame
-
-pygame.mixer.pre_init()
-pygame.mixer.init()
-
-ch0 = pygame.mixer.Channel(0)
-ch1 = pygame.mixer.Channel(1)
-ch2 = pygame.mixer.Channel(2)
-
-# ch0.queue(pygame.mixer.Sound('out/best2.mp3'))
-
-ch0.queue(pygame.mixer.Sound('music/03 - Heroes.mp3'))
-ch1.queue(pygame.mixer.Sound('music/03 - Heroes.mp3'))
-
-ch0.unpause()
-
-for i in range(10):
-    ch0.pause()
-    sleep(1)
-    ch0.unpause()
-    ch2.play(pygame.mixer.Sound('keyboard-sounds/DJ.wav'))
-    sleep(1)
-    ch2.play(pygame.mixer.Sound('keyboard-sounds/DJ.wav'))
-
-
-"""
