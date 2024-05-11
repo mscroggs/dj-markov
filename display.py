@@ -97,33 +97,3 @@ class Display:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     raise Quit
-
-"""
-title = "Title of the Song by Artist"
-
-rot = 0
-rpm = 100 / 3
-prev = time()
-
-pygame.draw.circle(screen, (0, 0, 0), (width // 4, height // 2), 9 * width // 40)
-
-while True:
-    pygame.draw.circle(screen, (255, 255, 255), (width // 4, height // 2), width // 10)
-    pygame.draw.circle(screen, (0, 0, 0), (width // 4, height // 2), width // 100)
-
-
-    for i, letter in enumerate(title):
-        t = my_font.render(letter, False, (0, 0, 0))
-
-        a = (rot + i*8) * np.pi / 180
-        r = width // 12
-        t = pygame.transform.rotate(t, - 90 - rot - i*8)
-        screen.blit(t, (
-            width // 4 + r * np.cos(a) - t.get_width() // 2,
-            height // 2 + r * np.sin(a) - t.get_height() // 2))
-
-    rot += 360 * rpm / 60 * (time() - prev)
-
-    prev = time()
-
-"""
