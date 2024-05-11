@@ -1,58 +1,129 @@
+import os
 import random
 import numpy as np
-from time import sleep
+from time import sleep, time
 import pygame
 
-width = 2160
-height = 3840
 
-pygame.init()
-
-screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN, display=1)
+class Quit(BaseException):
+    pass
 
 
-brot = {
-    "pos": (-0.75, 0.03),
-    "screen_pos": (width // 3, height // 3),
-    "unit": 0.001,
-}
+class Display:
+    def __init__(self, width=2160, height=3840, kwargs={"flags": pygame.FULLSCREEN, "display": 1}):
+        os.environ["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
+        self.width = width
+        self.height = height
+        self._dj_end = 0
+        self._error = 0
 
+        pygame.init()
+        self.screen = pygame.display.set_mode((width, height), **kwargs)
 
-def set_equal(a, b):
-    a = b[:a.shape[0], :a.shape[1]]
+    def draw_bg(self):
+        self.screen.fill((150, 150, 255))
 
+    def dj(self):
+        self._dj_end = time() + 0.8
 
-pixels = pygame.surfarray.pixels2d(screen)
+    def draw_dj(self):
+        font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//2)
+        t = font.render("DJ!", False, (0, 0, 0))
+        self.screen.blit(t, (
+            (self.width - t.get_width()) // 2 + random.randrange(11) - 5,
+            (self.height - t.get_height()) // 2 + random.randrange(11) - 5,
+        ))
 
-coords = np.zeros((width, height), dtype=np.complex)
+    def update(self):
+        pygame.display.update()
+
+    def tick(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                raise Quit
+        self.draw_bg()
+        if time() < self._dj_end:
+            self.draw_dj()
+        self.update()
+
+    def error(self, e):
+        self._error = True
+        self.screen.fill((0, 0, 255))
+        fontsize = self.width // 43
+        font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize)
+        t = font.render("DJ Markov", False, (0, 0, 255))
+        pygame.draw.rect(self.screen, (150, 150, 150), pygame.Rect(
+            (self.width - t.get_width() - 3) // 2,
+            (self.height - t.get_height() - 3) // 2 - fontsize * 4,
+            t.get_width() + 6, t.get_height() + 6,
+        ))
+        self.screen.blit(t, (
+            (self.width - t.get_width()) // 2,
+            (self.height - t.get_height()) // 2 - fontsize * 4,
+        ))
+        t = font.render("An error has occurred. To continue:", False, (255, 255, 255))
+        self.screen.blit(t, (
+            self.width // 2 - fontsize * 12,
+            (self.height - t.get_height()) // 2 - fontsize * 2,
+        ))
+        t = font.render("Turn DJ Markov off and on again, or", False, (255, 255, 255))
+        self.screen.blit(t, (
+            self.width // 2 - fontsize * 12,
+            (self.height - t.get_height()) // 2,
+        ))
+        t = font.render("Leave now and let someone else fix it", False, (255, 255, 255))
+        self.screen.blit(t, (
+            self.width // 2 - fontsize * 12,
+            (self.height - t.get_height()) // 2 + fontsize * 2,
+        ))
+
+        error_detail = f"Error: {e.__class__.__name__}: {e}"
+        line = 0
+        text = []
+        for word in error_detail.split() + ["<<END>>"]:
+            if word == "<<END>>" or (
+                len(text) > 0 and len(text) + len(word) + sum(len(w) for w in text) >= 50
+            ):
+                t = font.render(" ".join(text), False, (255, 255, 255))
+                self.screen.blit(t, (
+                    self.width // 2 - fontsize * 12,
+                    (self.height - t.get_height()) // 2 + fontsize * (line + 4),
+                ))
+                text = []
+                line += 1
+            text.append(word)
+        self.update()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    raise Quit
+
+"""
+title = "Title of the Song by Artist"
+
+rot = 0
+rpm = 100 / 3
+prev = time()
+
+pygame.draw.circle(screen, (0, 0, 0), (width // 4, height // 2), 9 * width // 40)
 
 while True:
-    top_left = tuple(i - brot["unit"] * j for i, j in zip(brot["pos"], brot["screen_pos"]))
-    bottom_right = (top_left[0] + width * brot["unit"], top_left[1] + height * brot["unit"])
+    pygame.draw.circle(screen, (255, 255, 255), (width // 4, height // 2), width // 10)
+    pygame.draw.circle(screen, (0, 0, 0), (width // 4, height // 2), width // 100)
 
-    print(top_left)
-    print(bottom_right)
 
-    imaginary_axis = np.linspace(top_left[1], bottom_right[1], num=height)
-    for i in range(height):
-        coords.real[:, i] = np.linspace(top_left[0], bottom_right[0], num=width)
-    for i in range(width):
-        coords.imag[i, :] = np.linspace(bottom_right[1], top_left[1], num=height)
+    for i, letter in enumerate(title):
+        t = my_font.render(letter, False, (0, 0, 0))
 
-    filter = np.ones(coords.shape, dtype=bool)
-    mask = np.ones(coords.shape, dtype=bool)
-    data = np.zeros(coords.shape, dtype=np.complex128)
+        a = (rot + i*8) * np.pi / 180
+        r = width // 12
+        t = pygame.transform.rotate(t, - 90 - rot - i*8)
+        screen.blit(t, (
+            width // 4 + r * np.cos(a) - t.get_width() // 2,
+            height // 2 + r * np.sin(a) - t.get_height() // 2))
 
-    pixels[:] = 0
-    for i in range(100):
-        data[filter] = data[filter] ** 2 + coords[filter]
-        mask = np.logical_and(filter, data.real ** 2 + data.imag**2 > 4)
-        pixels[mask] = i * 2
-        filter = np.logical_and(np.logical_not(mask), filter)
-        print(i)
+    rot += 360 * rpm / 60 * (time() - prev)
 
-    print(pixels)
-    # pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(200, 200, width-400, height-400))
-    pygame.display.update()
-    brot["unit"] *= 0.9
-    #sleep(0.5)
+    prev = time()
+
+"""
