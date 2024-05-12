@@ -27,6 +27,9 @@ class Display:
         self._choice_end = 0
         self._choice_in = 0
         self._error = 0
+        self._next_song = 0
+        self._song_in = None
+        self._song_out = None
         self._queued = None
         self._spinner = None
         self.animation_duration = animation_duration
@@ -37,10 +40,11 @@ class Display:
         self.screen = pygame.display.set_mode((width, height), **kwargs)
 
     def add_playing(self, title, artist):
+        self._song_in = time() + self.animation_duration
         self.playing.append([title, artist])
 
     def remove_playing(self):
-        self.playing = self.playing[1:]
+        self._song_out = time() + self.animation_duration
 
     def draw_bg(self):
         self.screen.fill((150, 150, 255))
@@ -59,19 +63,39 @@ class Display:
 
         t = medium_font.render("Now playing", False, (0, 0, 0))
         self.screen.blit(t, ((self.width - t.get_width()) // 2, (self.height - t.get_height()) // 2 + fontsize * 4))
-        # TODO: animate these joining and leaving
-        for i, (title, artist) in enumerate(self.playing):
-            t = font.render(title, False, (0, 0, 0))
-            self.screen.blit(t, ((self.width - t.get_width()) // 2, (self.height - t.get_height()) // 2 + fontsize * (6.5 + 3 * i)))
-            t = font.render(artist, False, (0, 0, 0))
-            self.screen.blit(t, ((self.width - t.get_width()) // 2, (self.height - t.get_height()) // 2 + fontsize * (7.5 + 3 * i)))
+        x0 = self.width / 2
+        y0 = self.height / 2 + fontsize * 6.5
+        x1 = self.width / 2
+        y1 = self.height / 2 + fontsize * 9.5
+        if self._song_out is not None:
+            if time() > self._song_out:
+                self.playing = self.playing[1:]
+                self._song_out = None
+            else:
+                x0 = - self.width / 2 + self.width * (self._song_out - time()) / self.animation_duration
+                y1 = y0 + (y1 - y0) * (self._song_out - time()) / self.animation_duration
+        if self._song_in is not None:
+            if time() > self._song_in:
+                self._song_in = None
+            else:
+                y1 = y1 + self.height * (self._song_in - time()) / self.animation_duration
+        if len(self.playing) > 0:
+            t = font.render(self.playing[0][0], False, (0, 0, 0))
+            self.screen.blit(t, (x0 - t.get_width() / 2, y0- t.get_height() / 2))
+            t = font.render(self.playing[0][1], False, (0, 0, 0))
+            self.screen.blit(t, (x0 - t.get_width() / 2, y0 + fontsize- t.get_height() / 2))
+        if len(self.playing) > 1:
+            t = font.render(self.playing[1][0], False, (0, 0, 0))
+            self.screen.blit(t, (x1 - t.get_width() / 2, y1- t.get_height() / 2))
+            t = font.render(self.playing[1][1], False, (0, 0, 0))
+            self.screen.blit(t, (x1 - t.get_width() / 2, y1 + fontsize - t.get_height() / 2))
 
     def dj(self):
         self._dj_end = time() + 0.8
 
-    def show_choice(self, display_names, weights, winner):
+    def show_choice(self, display_names, weights, winner, next_song):
         self._choice_in = time() + self.animation_duration
-        self._choice_end = time() + 20 + self.animation_duration + random.random() * 10
+        self._choice_end = time() + 10 + self.animation_duration + random.random() * 5
         self._display_names = display_names
         self._weights = weights / sum(weights)
         a = 0
@@ -81,6 +105,7 @@ class Display:
                 break
             a += w * 2 * np.pi
         self._queued = display_names[winner]
+        self._next_song = next_song
 
     def draw_choice(self):
         fontsize = self.width // 30
@@ -92,9 +117,6 @@ class Display:
         if time() < self._choice_in:
             x = x1 + (x2 - x1) * (self._choice_in - time()) / self.animation_duration
         elif time() > self._choice_end + self.hold_time:
-            if self._queued is not None:
-                self.add_playing(*self._queued)
-                self._queued = None
             x = x1 + (x2 - x1) * (time() - self._choice_end - self.hold_time) / self.animation_duration
         else:
             x = x1
@@ -103,7 +125,7 @@ class Display:
 
         pygame.draw.circle(self.screen, (255, 255, 255), (x, self.height // 2), r)
         pygame.draw.circle(self.screen, (0, 0, 0), (x, self.height // 2), r, 4)
-        a = self._end_rot + 12 * max(0, self._choice_end - time() - 15) + 1.5 * 4/15 * min(15, max(0, self._choice_end - time())) ** 2
+        a = self._end_rot + 2.5 * max(0, self._choice_end - time() - 5) + 0.25 * min(5, max(0, self._choice_end - time())) ** 2
         for w, (title, artist) in zip(self._weights, self._display_names):
             pygame.draw.line(self.screen, (0, 0, 0), (x, self.height // 2), (x + r * np.cos(a), self.height // 2 + r * np.sin(a)), 4)
 
@@ -139,6 +161,12 @@ class Display:
 
             a = next_a
 
+        mark = pygame.transform.rotate(
+            pygame.transform.scale(pygame.image.load("markov.png").convert_alpha(),
+                                   (self.width // 8, self.width // 8)),
+            -a * 180/np.pi)
+        self.screen.blit(mark, (x - mark.get_width() / 2, (self.height - mark.get_height()) / 2))
+
         big_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 5 // 2)
         t = big_font.render("Selecting next song", False, (0, 0, 0))
         self.screen.blit(t, (self.width // 2 - t.get_width() // 2, x - 3 * self.width // 64))
@@ -162,6 +190,11 @@ class Display:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 raise Quit
+
+        if self._queued is not None and time() > self._next_song:
+            self.add_playing(*self._queued)
+            self._queued = None
+
         self.draw_bg()
         self.draw_now_playing()
         if time() < self._choice_end + self.hold_time + self.animation_duration:

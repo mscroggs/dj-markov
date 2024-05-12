@@ -3,8 +3,10 @@ import mashup
 import os
 import random
 
+mode = "demo"
+
 try:
-    with open("data/songlist") as f:
+    with open(f"data/{mode}/songlist") as f:
         songs = [line.strip() for line in f]
 except FileNotFoundError:
     songs = []
@@ -22,14 +24,14 @@ def find_files(dir):
     return out
 
 
-for file in find_files("music"):
+for file in find_files(f"music/{mode}"):
     if file not in songs:
         songs.append(file)
-        with open("data/songlist", "a") as f:
+        with open(f"data/{mode}/songlist", "a") as f:
             f.write(f"{file}\n")
 
 try:
-    with open("data/mixability") as f:
+    with open(f"data/{mode}/mixability") as f:
         mixability = json.load(f)
 except FileNotFoundError:
     mixability = {}
@@ -48,7 +50,7 @@ def get_mixability(song1, song2):
             pass
         mixability[song1][song2] = m.mixability
 
-        with open("data/mixability", "w") as f:
+        with open(f"data/{mode}/mixability", "w") as f:
             json.dump(mixability, f)
 
     return mixability[song1][song2]
@@ -56,5 +58,6 @@ def get_mixability(song1, song2):
 
 for (i, s1) in enumerate(songs):
     for (j, s2) in enumerate(songs):
-        print(f"{1 + i * len(songs) + j} / {len(songs) ** 2}")
-        get_mixability(s1, s2)
+        if s1 != s2:
+            print(f"{1 + i * len(songs) + j} / {len(songs) ** 2}")
+            get_mixability(s1, s2)

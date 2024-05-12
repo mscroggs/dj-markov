@@ -5,14 +5,16 @@ from time import time
 from display import Display, Quit
 from just_playback import Playback
 
+mode = "demo"
+
 songdata = {}
-with open("out/data.json") as f:
+with open(f"out/{mode}/data.json") as f:
     for line in f:
         data = json.loads(line)
         if data["song1"] not in songdata:
             songdata[data["song1"]] = []
         songdata[data["song1"]].append(data)
-with open("out/info.json") as f:
+with open(f"out/{mode}/info.json") as f:
     info = json.load(f)
 
 ch0 = Playback()
@@ -65,8 +67,7 @@ while True:
             current = next
             next = None
             choice_shown = False
-        # elif playing.curr_pos > current["fade_start"] - 33:
-        elif not choice_shown and playing.curr_pos > current["fade_end"] - 63:
+        elif not choice_shown and playing.curr_pos > current["fade_start"] - 18:
             choice_shown = True
             options = songdata[current["song1"]]
             displays = [[
@@ -75,7 +76,7 @@ while True:
             ] for i in options]
             weights = np.array([i["rating"] for i in options])
             weights /= sum(weights)
-            display.show_choice(displays, weights, options.index(current))
+            display.show_choice(displays, weights, options.index(current), time() - playing.curr_pos + current["fade_start"])
 
         wait_until = time() + 1
         while time() < wait_until:
