@@ -1,3 +1,4 @@
+from mutagen.id3 import ID3
 import json
 import mashup
 import os
@@ -9,6 +10,13 @@ with open("out/data.json", "w") as f:
     pass
 
 scores = []
+info = {}
+
+for song in mixability:
+    tags = ID3(song)
+    info[song] = {"title": tags["TIT2"].text[0], "artist": tags["TPE1"].text[0]}
+with open("out/info.json", "w") as f:
+    json.dump(info, f)
 
 n = 0
 
