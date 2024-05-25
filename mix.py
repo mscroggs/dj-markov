@@ -4,7 +4,10 @@ import mashup
 import os
 import random
 
-mode = "demo"
+if len(sys.argv) > 1:
+    mode = sys.argv[1]
+else:
+    mode = "demo"
 
 with open(f"data/{mode}/mixability") as f:
     mixability = json.load(f)

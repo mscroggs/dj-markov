@@ -5,7 +5,10 @@ from time import time
 from display import Display, Quit
 from just_playback import Playback
 
-mode = "demo"
+if len(sys.argv) > 1:
+    mode = sys.argv[1]
+else:
+    mode = "demo"
 
 songdata = {}
 with open(f"out/{mode}/data.json") as f:

@@ -1,9 +1,15 @@
 import json
 import mashup
 import os
+import sys
 import random
 
-mode = "demo"
+if len(sys.argv) > 1:
+    mode = sys.argv[1]
+else:
+    mode = "demo"
+
+os.system(f"mkdir -p data/{mode}")
 
 try:
     with open(f"data/{mode}/songlist") as f:
