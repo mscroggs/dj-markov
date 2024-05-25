@@ -2,6 +2,7 @@ from mutagen.id3 import ID3
 import json
 import mashup
 import os
+import sys
 import random
 
 if len(sys.argv) > 1:

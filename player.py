@@ -1,5 +1,6 @@
 import numpy as np
 import json
+import sys
 import random
 from time import time
 from display import Display, Quit
