@@ -50,7 +50,8 @@ def get_mixability(song1, song2):
             m.analyse()
         except KeyboardInterrupt as e:
             raise e
-        except:
+        except BaseException as e:
+            print(e)
             pass
         mixability[song1][song2] = m.mixability
 
