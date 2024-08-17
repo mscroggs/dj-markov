@@ -3,16 +3,12 @@ import mashup
 import os
 import sys
 import random
+import config
 
-if len(sys.argv) > 1:
-    mode = sys.argv[1]
-else:
-    mode = "demo"
-
-os.system(f"mkdir -p data/{mode}")
+os.system(f"mkdir -p data/{config.mode}")
 
 try:
-    with open(f"data/{mode}/songlist") as f:
+    with open(f"data/{config.mode}/songlist") as f:
         songs = [line.strip() for line in f]
 except FileNotFoundError:
     songs = []
@@ -30,14 +26,14 @@ def find_files(dir):
     return out
 
 
-for file in find_files(f"music/{mode}"):
+for file in find_files(f"music/{config.mode}"):
     if file not in songs:
         songs.append(file)
-        with open(f"data/{mode}/songlist", "a") as f:
+        with open(f"data/{config.mode}/songlist", "a") as f:
             f.write(f"{file}\n")
 
 try:
-    with open(f"data/{mode}/mixability") as f:
+    with open(f"data/{config.mode}/mixability") as f:
         mixability = json.load(f)
 except FileNotFoundError:
     mixability = {}
@@ -52,11 +48,13 @@ def get_mixability(song1, song2):
             m = mashup.Mixer(song1, song2)
             m.load_songs()
             m.analyse()
+        except KeyboardInterrupt as e:
+            raise e
         except:
             pass
         mixability[song1][song2] = m.mixability
 
-        with open(f"data/{mode}/mixability", "w") as f:
+        with open(f"data/{config.mode}/mixability", "w") as f:
             json.dump(mixability, f)
 
     return mixability[song1][song2]

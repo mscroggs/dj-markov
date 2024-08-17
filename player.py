@@ -2,23 +2,19 @@ import numpy as np
 import json
 import sys
 import random
+import config
 from time import time
 from display import Display, Quit
 from just_playback import Playback
 
-if len(sys.argv) > 1:
-    mode = sys.argv[1]
-else:
-    mode = "demo"
-
 songdata = {}
-with open(f"out/{mode}/data.json") as f:
+with open(f"out/{config.mode}/data.json") as f:
     for line in f:
         data = json.loads(line)
         if data["song1"] not in songdata:
             songdata[data["song1"]] = []
         songdata[data["song1"]].append(data)
-with open(f"out/{mode}/info.json") as f:
+with open(f"out/{config.mode}/info.json") as f:
     info = json.load(f)
 
 ch0 = Playback()
@@ -34,8 +30,13 @@ choice_shown = False
 current_channel = 0
 ch0.load_file(current["filename"])
 
-# display = Display(450, 800, {})
-display = Display()
+# dj_rate = 0.8
+dj_rate = 0.99
+
+if config.windowed:
+    display = Display(450, 800, {})
+else:
+    display = Display()
 display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
 display.draw_bg()
 display.update()
@@ -44,7 +45,7 @@ ch0.play()
 
 while True:
     try:
-        if random.random() > 0.8:
+        if random.random() > dj_rate:
             ch2.play()
             display.dj()
 

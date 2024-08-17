@@ -1,6 +1,7 @@
 import os
 import random
 import numpy as np
+import config
 from time import sleep, time
 import pygame
 
@@ -55,8 +56,8 @@ class Display:
         medium_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 2)
         big_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 5 // 2)
         lw = fontsize * 1.3
-        lstart = self.width // 2 - lw * (len("DJ Markov") - 1) / 2
-        for i, letter in enumerate("DJ Markov"):
+        lstart = self.width // 2 - lw * (len(config.name) - 1) / 2
+        for i, letter in enumerate(config.name):
             t = big_font.render(letter, False, (0, 0, 0))
             y = (self.height - t.get_height()) // 2 - self.height // 40 * np.sin(2 * (time() - i / 16)) ** 20
             self.screen.blit(t, (lstart + lw * i - t.get_width() // 2, y))
@@ -208,7 +209,7 @@ class Display:
         self.screen.fill((0, 0, 255))
         fontsize = self.width // 43
         font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize)
-        t = font.render("DJ Markov", False, (0, 0, 255))
+        t = font.render(config.name, False, (0, 0, 255))
         pygame.draw.rect(self.screen, (150, 150, 150), pygame.Rect(
             (self.width - t.get_width() - 3) // 2,
             (self.height - t.get_height() - 3) // 2 - fontsize * 4,

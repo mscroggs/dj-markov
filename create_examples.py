@@ -2,10 +2,9 @@ import json
 import mashup
 import os
 import random
+import config
 
-mode = "demo"
-
-with open(f"data/{mode}/mixability") as f:
+with open(f"data/{config.mode}/mixability") as f:
     mixability = json.load(f)
 
 scores = []

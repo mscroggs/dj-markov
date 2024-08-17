@@ -4,13 +4,13 @@
 Run:
 
 ```bash
-python3 analyse_songs.py name_of_folder
-python3 mix.py name_of_folder
+python3 analyse_songs.py
+python3 mix.py
 ```
 
 ## Running DJ Markov
 Run:
 
 ```bash
-python3 player.py name_of_folder
+python3 player.py
 ```
