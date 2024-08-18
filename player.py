@@ -30,8 +30,8 @@ choice_shown = False
 current_channel = 0
 ch0.load_file(current["filename"])
 
-# dj_rate = 0.8
-dj_rate = 0.99
+if config.no_repeats:
+    played = [current["song1"], current["song2"]]
 
 if config.windowed:
     display = Display(450, 800, {})
@@ -45,7 +45,7 @@ ch0.play()
 
 while True:
     try:
-        if random.random() > dj_rate:
+        if random.random() > 1 - config.dj_rate:
             ch2.play()
             display.dj()
 
@@ -58,10 +58,20 @@ while True:
 
         if next is None:
             options = songdata[current["song2"]]
+            if config.no_repeats:
+                op = [i for i in options if i["song2"] not in played and i["song2"][0] != "x"]
+                if len(op) > 0:
+                    options = op
+                else:
+                    op = [i for i in options if i["song2"] not in played]
+                    if len(op) > 0:
+                        options = op
             weights = np.array([i["rating"] for i in options])
             weights /= sum(weights)
             next = np.random.choice(options, p=weights)
             queued.load_file(next["filename"])
+            if config.no_repeats:
+                played.append(next["song2"])
 
         if playing.curr_pos > current["fade_end"]:
             display.remove_playing()
