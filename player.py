@@ -1,3 +1,4 @@
+import pygame
 import numpy as np
 import json
 import sys
@@ -20,8 +21,10 @@ with open(f"out/{config.mode}/info.json") as f:
 ch0 = Playback()
 ch1 = Playback()
 ch2 = Playback()
+ch3 = Playback()
 
 ch2.load_file("keyboard-sounds/DJ.wav")
+ch3.load_file("keyboard-sounds/Scratch.wav")
 
 current = None
 while current is None:
@@ -48,6 +51,7 @@ display.draw_bg()
 display.update()
 ch0.play()
 
+pressed = []
 
 while True:
     try:
@@ -61,6 +65,21 @@ while True:
         else:
             playing = ch1
             queued = ch0
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_f]:
+            if "f" not in pressed:
+                playing.seek(playing.curr_pos + 15)
+            pressed.append("f")
+        elif "f" in pressed:
+            pressed.remove("f")
+        if keys[pygame.K_d]:
+            if "d" not in pressed:
+                ch2.play()
+                display.dj()
+            pressed.append("d")
+        elif "d" in pressed:
+            pressed.remove("d")
 
         if next is None:
             options = songdata[current["song2"]]
