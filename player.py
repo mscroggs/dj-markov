@@ -3,7 +3,7 @@ import json
 import sys
 import random
 import config
-from time import time
+from time import time, sleep
 from display import Display, Quit
 from just_playback import Playback
 
@@ -23,7 +23,13 @@ ch2 = Playback()
 
 ch2.load_file("keyboard-sounds/DJ.wav")
 
-current = random.choice(random.choice(list(songdata.values())))
+current = None
+while current is None:
+    try:
+        current = random.choice([i for i in random.choice(list(songdata.values())) if "/x" not in i["song1"] and "/x" not in i["song2"]])
+    except IndexError:
+        pass
+
 next = None
 choice_shown = False
 
@@ -59,7 +65,7 @@ while True:
         if next is None:
             options = songdata[current["song2"]]
             if config.no_repeats:
-                op = [i for i in options if i["song2"] not in played and i["song2"][0] != "x"]
+                op = [i for i in options if i["song2"] not in played and "/x" not in i["song2"]]
                 if len(op) > 0:
                     options = op
                 else:
@@ -77,6 +83,7 @@ while True:
             display.remove_playing()
             queued.play()
             queued.seek(current["song2_fade_end"] + playing.curr_pos - current["fade_end"])
+            sleep(0.05)
             playing.pause()
             current_channel = 1 - current_channel
             current = next
