@@ -34,6 +34,10 @@ current = None
 while current is None:
     try:
         current = random.choice([i for i in random.choice(list(songdata.values())) if "/x" not in i["song1"] and "/x" not in i["song2"]])
+        if "Ya!" not in current["song1"]:
+            current = None
+        elif "YMCA" not in current["song2"]:
+            current = None
     except IndexError:
         pass
 
