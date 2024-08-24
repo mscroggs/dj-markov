@@ -23,8 +23,11 @@ ch1 = Playback()
 ch2 = Playback()
 ch3 = Playback()
 
+ch0.set_volume(0.3)
+ch1.set_volume(0.3)
+
+
 ch2.load_file("keyboard-sounds/DJ.wav")
-ch3.load_file("keyboard-sounds/Scratch.wav")
 
 current = None
 while current is None:
@@ -43,9 +46,11 @@ if config.no_repeats:
     played = [current["song1"], current["song2"]]
 
 if config.windowed:
-    display = Display(450, 800, {})
+    height = 900
+    width = height * 9 // 16
+    display = Display(width, height, {})
 else:
-    display = Display()
+    display = Display(width=1080, height=1920)
 display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
 display.draw_bg()
 display.update()
@@ -66,21 +71,6 @@ while True:
             playing = ch1
             queued = ch0
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_f]:
-            if "f" not in pressed:
-                playing.seek(playing.curr_pos + 15)
-            pressed.append("f")
-        elif "f" in pressed:
-            pressed.remove("f")
-        if keys[pygame.K_d]:
-            if "d" not in pressed:
-                ch2.play()
-                display.dj()
-            pressed.append("d")
-        elif "d" in pressed:
-            pressed.remove("d")
-
         if next is None:
             options = songdata[current["song2"]]
             if config.no_repeats:
@@ -98,7 +88,7 @@ while True:
             if config.no_repeats:
                 played.append(next["song2"])
 
-        if playing.curr_pos > current["fade_end"]:
+        if playing.curr_pos > current["fade_end"] + 2000:
             display.remove_playing()
             queued.play()
             queued.seek(current["song2_fade_end"] + playing.curr_pos - current["fade_end"])
@@ -121,7 +111,90 @@ while True:
 
         wait_until = time() + 1
         while time() < wait_until:
+            keys = pygame.key.get_pressed()
+            # if keys[pygame.K_f]:
+            #    if pygame.K_f not in pressed:
+            #        playing.seek(playing.curr_pos + 15)
+            #        pressed.append(pygame.K_f)
+            # elif pygame.K_f in pressed:
+            #    pressed.remove(pygame.K_f)
+
+            dj_buttons = [
+                (pygame.K_z, "keyboard-sounds/DJ.wav", "DJ!"),
+                (pygame.K_x, "keyboard-sounds/Dictionary.wav", "Dictionary"),
+                (pygame.K_c, "keyboard-sounds/Scratch.wav", None),
+                (pygame.K_v, "keyboard-sounds/Scratch2.wav", None),
+                (pygame.K_b, "keyboard-sounds/scratch3.wav", None),
+
+                (pygame.K_q, "phrases/activating.wav", None),
+                (pygame.K_w, "phrases/arm-extend.wav", None),
+                (pygame.K_e, "phrases/destroy-humans-activated.wav", None),
+                (pygame.K_r, "phrases/destroy-humans-mode-deactivated.wav", None),
+                (pygame.K_t, "phrases/foxdog.wav", None),
+                (pygame.K_y, "phrases/ymca.wav", None),
+                (pygame.K_u, "phrases/hello-matt.wav", None),
+                (pygame.K_o, "phrases/death.wav", None),
+                (pygame.K_p, "phrases/dance.wav", None),
+                (pygame.K_1, "phrases/dj2.wav", "DJ!"),
+                (pygame.K_2, "phrases/dj.wav", "DJ!"),
+                (pygame.K_3, "phrases/no-repeats.wav", None),
+                (pygame.K_4, "phrases/one-more-song.wav", None),
+                (pygame.K_5, "phrases/party.wav", None),
+                (pygame.K_6, "phrases/robot.wav", None),
+                (pygame.K_8, "phrases/the-end.wav", None),
+                (pygame.K_9, "phrases/updates.wav", None),
+                (pygame.K_0, "phrases/ending.wav", None),
+            ]
+
+            n = random.choice([
+                ("ahhhhh.wav", None),
+                ("BZZhorn.wav", None),
+                ("comeon2.wav", None),
+                ("Comeon.wav", None),
+                ("Dictionary.wav", "Dictionary"),
+                ("DJ.wav", "DJ!"),
+                ("Excellent.wav", "Excellent!"),
+                ("getout.wav", None),
+                ("good.wav", None),
+                ("go.wav", None),
+                ("HEUUUUUUUUUUGH.wav", None),
+                ("horn.wav", None),
+                ("lesson.wav", None),
+                ("OKAY.wav", None),
+                ("onemoretime.wav", None),
+                ("one.wav", None),
+                ("ooowww.wav", None),
+                ("o.wav", None),
+                ("peeeeew.wav", None),
+                ("reversecymbal.wav", None),
+                ("rewind.wav", None),
+                ("Scratch2.wav", None),
+                ("scratch3.wav", None),
+                ("scratchdown.wav", None),
+                ("Scratch.wav", None),
+                ("sonic.wav", None),
+                ("stab2.wav", None),
+                ("stab.wav", None),
+                ("three.wav", None),
+                ("two.wav", None),
+                ("verygood.wav", None),
+                ("wooo.wav", None),
+                ("yeeeeeeeah.wav", None),
+            ])
+            dj_buttons.append((pygame.K_n, f"keyboard-sounds/{n[0]}", n[1]))
+
+            for key, file, text in dj_buttons:
+                if keys[key]:
+                    if key not in pressed:
+                        ch3.load_file(file)
+                        ch3.play()
+                        if text is not None:
+                            display.dj(text)
+                        pressed.append(key)
+                elif key in pressed:
+                    pressed.remove(key)
             display.tick()
+
     except Quit:
         break
     except BaseException as e:

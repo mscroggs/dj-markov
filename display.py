@@ -25,6 +25,7 @@ class Display:
         self.width = width
         self.height = height
         self._dj_end = 0
+        self._dj_text = "DJ!"
         self._choice_end = 0
         self._choice_in = 0
         self._error = 0
@@ -33,9 +34,11 @@ class Display:
         self._song_out = None
         self._queued = None
         self._spinner = None
+        self._tran_start = None
         self.animation_duration = animation_duration
         self.hold_time = hold_time
         self.playing = []
+
 
         pygame.init()
         self.screen = pygame.display.set_mode((width, height), **kwargs)
@@ -48,26 +51,39 @@ class Display:
         self._song_out = time() + self.animation_duration
 
     def draw_bg(self):
-        self.screen.fill((150, 150, 255))
+        self.screen.fill((163, 218, 234))
 
     def draw_now_playing(self):
-        fontsize = self.width // 30
+        fontsize = self.width // 30 * 2
         font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize)
+        middle_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 5 // 4)
         medium_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 2)
         big_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 5 // 2)
         lw = fontsize * 1.3
         lstart = self.width // 2 - lw * (len(config.name) - 1) / 2
         for i, letter in enumerate(config.name):
             t = big_font.render(letter, False, (0, 0, 0))
-            y = (self.height - t.get_height()) // 2 - self.height // 40 * np.sin(2 * (time() - i / 16)) ** 20
+            y = (self.height - t.get_height()) // 25 - self.height // 15 * np.sin(2 * (time() - i / 16)) ** 20
             self.screen.blit(t, (lstart + lw * i - t.get_width() // 2, y))
 
-        t = medium_font.render("Now playing", False, (0, 0, 0))
-        self.screen.blit(t, ((self.width - t.get_width()) // 2, (self.height - t.get_height()) // 2 + fontsize * 4))
+        if len(self.playing) > 1:
+            if self._tran_start is None:
+                self._tran_start = time()
+            if time() - self._tran_start < 3:
+                if time() % 1.0 < 0.5:
+                    t = middle_font.render("COMPUTING TRANSITION", False, (0, 0, 0))
+                    self.screen.blit(t, ((self.width - t.get_width()) // 2, (self.height - t.get_height()) // 25 + fontsize * 4))
+            else:
+                t = medium_font.render("Now playing", False, (0, 0, 0))
+                self.screen.blit(t, ((self.width - t.get_width()) // 2, (self.height - t.get_height()) // 25 + fontsize * 4))
+        else:
+            self._tran_start = None
+            t = medium_font.render("Now playing", False, (0, 0, 0))
+            self.screen.blit(t, ((self.width - t.get_width()) // 2, (self.height - t.get_height()) // 25 + fontsize * 4))
         x0 = self.width / 2
-        y0 = self.height / 2 + fontsize * 6.5
+        y0 = self.height / 25 + fontsize * 6.5
         x1 = self.width / 2
-        y1 = self.height / 2 + fontsize * 9.5
+        y1 = self.height / 25 + fontsize * 9.5
         if self._song_out is not None:
             if time() > self._song_out:
                 self.playing = self.playing[1:]
@@ -83,15 +99,22 @@ class Display:
         if len(self.playing) > 0:
             t = font.render(self.playing[0][0], False, (0, 0, 0))
             self.screen.blit(t, (x0 - t.get_width() / 2, y0- t.get_height() / 2))
-            t = font.render(self.playing[0][1], False, (0, 0, 0))
+            artist_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", min(
+                fontsize, self.width // len(self.playing[0][1]) * 2
+            ))
+            t = artist_font.render(self.playing[0][1], False, (0, 0, 0))
             self.screen.blit(t, (x0 - t.get_width() / 2, y0 + fontsize- t.get_height() / 2))
         if len(self.playing) > 1:
             t = font.render(self.playing[1][0], False, (0, 0, 0))
             self.screen.blit(t, (x1 - t.get_width() / 2, y1- t.get_height() / 2))
-            t = font.render(self.playing[1][1], False, (0, 0, 0))
+            artist_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", min(
+                fontsize, self.width // len(self.playing[0][1]) * 2
+            ))
+            t = artist_font.render(self.playing[0][1], False, (0, 0, 0))
             self.screen.blit(t, (x1 - t.get_width() / 2, y1 + fontsize - t.get_height() / 2))
 
-    def dj(self):
+    def dj(self, text="DJ!"):
+        self._dj_text = text
         self._dj_end = time() + 0.8
 
     def show_choice(self, display_names, weights, winner, next_song):
@@ -113,6 +136,7 @@ class Display:
         font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize)
 
         x1 = 25 * self.width // 64
+        x1 = self.width // 2
         x2 = - self.width // 2
 
         if time() < self._choice_in:
@@ -124,11 +148,11 @@ class Display:
 
         r = 3 * self.width // 8
 
-        pygame.draw.circle(self.screen, (255, 255, 255), (x, self.height // 2), r)
-        pygame.draw.circle(self.screen, (0, 0, 0), (x, self.height // 2), r, 4)
+        pygame.draw.circle(self.screen, (255, 255, 255), (x, self.height // 5), r)
+        pygame.draw.circle(self.screen, (0, 0, 0), (x, self.height // 5), r, 4)
         a = self._end_rot + 2.5 * max(0, self._choice_end - time() - 5) + 0.25 * min(5, max(0, self._choice_end - time())) ** 2
         for w, (title, artist) in zip(self._weights, self._display_names):
-            pygame.draw.line(self.screen, (0, 0, 0), (x, self.height // 2), (x + r * np.cos(a), self.height // 2 + r * np.sin(a)), 4)
+            pygame.draw.line(self.screen, (0, 0, 0), (x, self.height // 5), (x + r * np.cos(a), self.height // 5 + r * np.sin(a)), 4)
 
             next_a = a + w * 2 * np.pi
 
@@ -144,7 +168,7 @@ class Display:
                 t = pygame.transform.rotate(t, - 90 - la * 180/np.pi)
                 self.screen.blit(t, (
                     x + r2 * np.cos(la) - t.get_width() // 2,
-                    self.height // 2 + r2 * np.sin(la) - t.get_height() // 2))
+                    self.height // 5 + r2 * np.sin(la) - t.get_height() // 2))
 
             # Write artist
             lsp = np.pi / 43
@@ -158,30 +182,30 @@ class Display:
                 t = pygame.transform.rotate(t, - 90 - la * 180/np.pi)
                 self.screen.blit(t, (
                     x + r2 * np.cos(la) - t.get_width() // 2,
-                    self.height // 2 + r2 * np.sin(la) - t.get_height() // 2))
+                    self.height // 5 + r2 * np.sin(la) - t.get_height() // 2))
 
             a = next_a
 
         mark = pygame.transform.rotate(
-            pygame.transform.scale(pygame.image.load("markov.png").convert_alpha(),
+            pygame.transform.scale(pygame.image.load("dj2.png").convert_alpha(),
                                    (self.width // 8, self.width // 8)),
             -a * 180/np.pi)
-        self.screen.blit(mark, (x - mark.get_width() / 2, (self.height - mark.get_height()) / 2))
+        self.screen.blit(mark, (x - mark.get_width() / 2, self.height / 5 - mark.get_height() / 2))
 
         big_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 5 // 2)
-        t = big_font.render("Selecting next song", False, (0, 0, 0))
-        self.screen.blit(t, (self.width // 2 - t.get_width() // 2, x - 3 * self.width // 64))
+        t = big_font.render("RANDOM SELECTION", False, (0, 0, 0))
+        self.screen.blit(t, (self.width // 2 - t.get_width() // 2, x + 3 * self.width // 64 + self.height // 8))
 
-        pygame_rounded_line(self.screen, (0, 0, 0), (self.width - x + self.width // 20 + 6 * self.width // 64, self.height // 2), (self.width - x + self.width // 6 + 6 * self.width // 64, self.height // 2), 17)
-        pygame_rounded_line(self.screen, (0, 0, 0), (self.width - x + self.width // 20 + 6 * self.width // 64, self.height // 2), (self.width - x + self.width // 12 + 6 * self.width // 64, self.height // 2 + self.width // 50), 17)
-        pygame_rounded_line(self.screen, (0, 0, 0), (self.width - x + self.width // 20 + 6 * self.width // 64, self.height // 2), (self.width - x + self.width // 12 + 6 * self.width // 64, self.height // 2 - self.width // 50), 17)
+        pygame_rounded_line(self.screen, (0, 0, 0), (self.width - x + self.width // 20 + 20 * self.width // 64, self.height // 5), (self.width - x + self.width // 6 + 20 * self.width // 64, self.height // 5), 17)
+        pygame_rounded_line(self.screen, (0, 0, 0), (self.width - x + self.width // 20 + 20 * self.width // 64, self.height // 5), (self.width - x + self.width // 12 + 20 * self.width // 64, self.height // 5 + self.width // 50), 17)
+        pygame_rounded_line(self.screen, (0, 0, 0), (self.width - x + self.width // 20 + 20 * self.width // 64, self.height // 5), (self.width - x + self.width // 12 + 20 * self.width // 64, self.height // 5 - self.width // 50), 17)
 
     def draw_dj(self):
-        font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//2)
-        t = font.render("DJ!", False, (0, 0, 0))
+        font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//max(2, len(self._dj_text) - 5))
+        t = font.render(self._dj_text, False, (0, 0, 0))
         self.screen.blit(t, (
             (self.width - t.get_width()) // 2 + random.randrange(11) - 5,
-            (self.height - t.get_height()) // 2 + random.randrange(11) - 5,
+            (self.height - t.get_height()) // 25 + random.randrange(11) - 5,
         ))
 
     def update(self):
