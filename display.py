@@ -97,7 +97,10 @@ class Display:
             else:
                 y1 = y1 + self.height * (self._song_in - time()) / self.animation_duration
         if len(self.playing) > 0:
-            t = font.render(self.playing[0][0], False, (0, 0, 0))
+            title_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", min(
+                fontsize, self.width // len(self.playing[0][0]) * 2
+            ))
+            t = title_font.render(self.playing[0][0], False, (0, 0, 0))
             self.screen.blit(t, (x0 - t.get_width() / 2, y0- t.get_height() / 2))
             artist_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", min(
                 fontsize, self.width // len(self.playing[0][1]) * 2
@@ -105,7 +108,10 @@ class Display:
             t = artist_font.render(self.playing[0][1], False, (0, 0, 0))
             self.screen.blit(t, (x0 - t.get_width() / 2, y0 + fontsize- t.get_height() / 2))
         if len(self.playing) > 1:
-            t = font.render(self.playing[1][0], False, (0, 0, 0))
+            title_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", min(
+                fontsize, self.width // len(self.playing[1][0]) * 2
+            ))
+            t = title_font.render(self.playing[1][0], False, (0, 0, 0))
             self.screen.blit(t, (x1 - t.get_width() / 2, y1- t.get_height() / 2))
             artist_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", min(
                 fontsize, self.width // len(self.playing[1][1]) * 2
