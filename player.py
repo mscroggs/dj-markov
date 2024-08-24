@@ -88,7 +88,7 @@ while True:
             if config.no_repeats:
                 played.append(next["song2"])
 
-        if playing.curr_pos > current["fade_end"] + 2000:
+        if playing.curr_pos > current["fade_end"] + 2:
             display.remove_playing()
             queued.play()
             queued.seek(current["song2_fade_end"] + playing.curr_pos - current["fade_end"])
@@ -112,12 +112,12 @@ while True:
         wait_until = time() + 1
         while time() < wait_until:
             keys = pygame.key.get_pressed()
-            # if keys[pygame.K_f]:
-            #    if pygame.K_f not in pressed:
-            #        playing.seek(playing.curr_pos + 15)
-            #        pressed.append(pygame.K_f)
-            # elif pygame.K_f in pressed:
-            #    pressed.remove(pygame.K_f)
+            if keys[pygame.K_f]:
+               if pygame.K_f not in pressed:
+                   playing.seek(playing.curr_pos + 15)
+                   pressed.append(pygame.K_f)
+            elif pygame.K_f in pressed:
+                pressed.remove(pygame.K_f)
 
             dj_buttons = [
                 (pygame.K_z, "keyboard-sounds/DJ.wav", "DJ!"),

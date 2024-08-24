@@ -108,9 +108,9 @@ class Display:
             t = font.render(self.playing[1][0], False, (0, 0, 0))
             self.screen.blit(t, (x1 - t.get_width() / 2, y1- t.get_height() / 2))
             artist_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", min(
-                fontsize, self.width // len(self.playing[0][1]) * 2
+                fontsize, self.width // len(self.playing[1][1]) * 2
             ))
-            t = artist_font.render(self.playing[0][1], False, (0, 0, 0))
+            t = artist_font.render(self.playing[1][1], False, (0, 0, 0))
             self.screen.blit(t, (x1 - t.get_width() / 2, y1 + fontsize - t.get_height() / 2))
 
     def dj(self, text="DJ!"):
@@ -118,13 +118,33 @@ class Display:
         self._dj_end = time() + 0.8
 
     def show_choice(self, display_names, weights, winner, next_song):
+        added = [winner]
+        n = [display_names[winner]]
+        w = [weights[winner]]
+
+        while len(n) < min(6, len(display_names)):
+            add = random.choice([i for i, _ in enumerate(display_names) if i not in added])
+            if random.random() > 0.5:
+                added.append(add)
+                n.append(display_names[add])
+                w.append(weights[add])
+            else:
+                added = [add] + added
+                n = [display_names[add]] + n
+                w = [weights[add]] + w
+
+        new_winner = added.index(winner)
+
+        w = np.array(w)
+        w /= sum(w)
+
         self._choice_in = time() + self.animation_duration
         self._choice_end = time() + 10 + self.animation_duration + random.random() * 5
-        self._display_names = display_names
-        self._weights = weights / sum(weights)
+        self._display_names = n
+        self._weights = w
         a = 0
-        for i, w in enumerate(weights):
-            if i == winner:
+        for i, w in enumerate(w):
+            if i == new_winner:
                 self._end_rot = -(a + random.random() * w * 2 * np.pi)
                 break
             a += w * 2 * np.pi
