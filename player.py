@@ -44,8 +44,9 @@ down_for_voice = False
 current_channel = 0
 ch0.load_file(current["filename"])
 
-if config.no_repeats:
-    played = [current["song1"], current["song2"]]
+played = [current["song1"], current["song2"]]
+
+no_repeats = config.no_repeats
 
 if config.windowed:
     height = 900
@@ -75,7 +76,7 @@ while True:
 
         if next is None:
             options = songdata[current["song2"]]
-            if config.no_repeats:
+            if no_repeats:
                 op = [i for i in options if i["song2"] not in played and "/x" not in i["song2"]]
                 if len(op) > 0:
                     options = op
@@ -87,8 +88,7 @@ while True:
             weights /= sum(weights)
             next = np.random.choice(options, p=weights)
             queued.load_file(next["filename"])
-            if config.no_repeats:
-                played.append(next["song2"])
+            played.append(next["song2"])
 
         if playing.curr_pos > current["fade_end"] + 2:
             display.remove_playing()
@@ -120,6 +120,14 @@ while True:
                    pressed.append(pygame.K_f)
             elif pygame.K_f in pressed:
                 pressed.remove(pygame.K_f)
+            if not no_repeats:
+                if keys[pygame.K_l]:
+                    no_repeats = True
+                    ch3.load_file("phrases/no-repeats.wav")
+                    ch3.play()
+                    down_for_voice = True
+                    ch0.set_volume(volumes[1])
+                    ch1.set_volume(volumes[1])
 
             dj_buttons = [
                 (pygame.K_z, "keyboard-sounds/DJ.wav", "DJ!", False),
@@ -139,7 +147,6 @@ while True:
                 (pygame.K_p, "phrases/dance.wav", None, True),
                 (pygame.K_1, "phrases/dj2.wav", "DJ!", False),
                 (pygame.K_2, "phrases/dj.wav", "DJ!", False),
-                (pygame.K_3, "phrases/no-repeats.wav", None, True),
                 (pygame.K_4, "phrases/one-more-song.wav", None, True),
                 (pygame.K_5, "phrases/party.wav", None, True),
                 (pygame.K_6, "phrases/robot.wav", None, True),
