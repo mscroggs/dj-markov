@@ -29,6 +29,8 @@ class Display:
         self._choice_end = 0
         self._choice_in = 0
         self._error = 0
+        self._is_loading = False
+        self._loading_start = 0
         self._next_song = 0
         self._song_in = None
         self._song_out = None
@@ -39,13 +41,19 @@ class Display:
         self.hold_time = hold_time
         self.playing = []
 
-
         pygame.init()
         self.screen = pygame.display.set_mode((width, height), **kwargs)
 
     def add_playing(self, title, artist):
         self._song_in = time() + self.animation_duration
         self.playing.append([title, artist])
+
+    def show_loading(self):
+        self._is_loading = True
+        self._loading_start = time()
+
+    def is_loading(self):
+        return self._is_loading
 
     def remove_playing(self):
         self._song_out = time() + self.animation_duration
@@ -213,7 +221,7 @@ class Display:
             a = next_a
 
         mark = pygame.transform.rotate(
-            pygame.transform.scale(pygame.image.load("dj2.png").convert_alpha(),
+            pygame.transform.scale(pygame.image.load("dj4.png").convert_alpha(),
                                    (self.width // 8, self.width // 8)),
             -a * 180/np.pi)
         self.screen.blit(mark, (x - mark.get_width() / 2, self.height / 5 - mark.get_height() / 2))
@@ -234,6 +242,57 @@ class Display:
             (self.height - t.get_height()) // 25 + random.randrange(11) - 5,
         ))
 
+    def draw_loading(self):
+        font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//10)
+        d = time() - self._loading_start
+        if d % 0.9 < 0.3:
+            t = font.render("Initialising.", False, (0, 0, 0))
+        elif d % 0.9 < 0.6:
+            t = font.render("Initialising..", False, (0, 0, 0))
+        else:
+            t = font.render("Initialising...", False, (0, 0, 0))
+        self.screen.blit(t, (
+            self.width // 9,
+            self.height // 30 - t.get_height() // 2,
+        ))
+
+        if d < 1.5:
+            message = "Installing update 1 of 1000"
+        elif d < 2.5:
+            message = "Installing update 2 of 1000"
+        elif d < 2.8:
+            message = "Installing update 3 of 1000"
+        elif d < 10:
+            message = "Installing update 4 of 1000"
+        elif d < 11.5:
+            message = "Updates cancelled"
+        elif d < 13:
+            message = "Initialising bass"
+        elif d < 14.5:
+            message = "Setting freshness to maximum"
+        elif d < 15.5:
+            message = "Enabling kill all humans module"
+        elif d < 16.5:
+            message = "Setting phasars to DISCO"
+        elif d < 18:
+            message = "Throwing shapes"
+        elif d < 19.5:
+            message = "Setting volume to maximum"
+        elif d < 21:
+            message = "Setting volume to APPROPRIATE"
+        elif d < 24:
+            message = "Activating dance appendages"
+        else:
+            self._is_loading = False
+            return
+
+        msg_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//max(11, 1 + len(message) // 2))
+        t = msg_font.render(message, False, (0, 0, 0))
+        self.screen.blit(t, (
+            (self.width - t.get_width()) // 2,
+            self.height // 10 - t.get_height() // 2
+        ))
+
     def update(self):
         pygame.display.update()
 
@@ -242,11 +301,17 @@ class Display:
             if event.type == pygame.QUIT:
                 raise Quit
 
+        self.draw_bg()
+
+        if self._is_loading:
+            self.draw_loading()
+            self.update()
+            return
+
         if self._queued is not None and time() > self._next_song:
             self.add_playing(*self._queued)
             self._queued = None
 
-        self.draw_bg()
         self.draw_now_playing()
         if time() < self._choice_end + self.hold_time + self.animation_duration:
             self.draw_choice()

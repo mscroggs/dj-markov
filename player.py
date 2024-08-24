@@ -54,6 +54,14 @@ if config.windowed:
     display = Display(width, height, {})
 else:
     display = Display(width=1080, height=1920)
+
+ch3.load_file("sounds/startup.mp3")
+ch3.play()
+
+display.show_loading()
+while ch3.active or display.is_loading():
+    display.tick()
+
 display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
 display.draw_bg()
 display.update()
