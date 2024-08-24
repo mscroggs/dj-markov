@@ -31,6 +31,8 @@ class Display:
         self._error = 0
         self._is_loading = False
         self._loading_start = 0
+        self._is_ending = False
+        self._ending_start = 0
         self._next_song = 0
         self._song_in = None
         self._song_out = None
@@ -54,6 +56,13 @@ class Display:
 
     def is_loading(self):
         return self._is_loading
+
+    def show_ending(self):
+        self._is_ending = True
+        self._ending_start = time()
+
+    def is_ending(self):
+        return self._is_ending
 
     def remove_playing(self):
         self._song_out = time() + self.animation_duration
@@ -256,34 +265,62 @@ class Display:
             self.height // 30 - t.get_height() // 2,
         ))
 
-        if d < 1.5:
+        if d < 0.5:
             message = "Installing update 1 of 1000"
-        elif d < 2.5:
+        elif d < 1:
             message = "Installing update 2 of 1000"
-        elif d < 2.8:
+        elif d < 1.3:
             message = "Installing update 3 of 1000"
-        elif d < 10:
+        elif d < 5:
             message = "Installing update 4 of 1000"
-        elif d < 11.5:
+        elif d < 6:
             message = "Updates cancelled"
-        elif d < 13:
+        elif d < 7:
             message = "Initialising bass"
-        elif d < 14.5:
+        elif d < 8:
             message = "Setting freshness to maximum"
-        elif d < 15.5:
+        elif d < 9:
             message = "Enabling kill all humans module"
-        elif d < 16.5:
+        elif d < 9.5:
             message = "Setting phasars to DISCO"
-        elif d < 18:
+        elif d < 10.5:
             message = "Throwing shapes"
-        elif d < 19.5:
+        elif d < 11.5:
             message = "Setting volume to maximum"
-        elif d < 21:
+        elif d < 12.5:
             message = "Setting volume to APPROPRIATE"
-        elif d < 24:
+        elif d < 17:
             message = "Activating dance appendages"
         else:
             self._is_loading = False
+            return
+
+        msg_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//max(11, 1 + len(message) // 2))
+        t = msg_font.render(message, False, (0, 0, 0))
+        self.screen.blit(t, (
+            (self.width - t.get_width()) // 2,
+            self.height // 10 - t.get_height() // 2
+        ))
+
+    def draw_ending(self):
+        font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//10)
+        d = time() - self._ending_start
+        if d % 0.9 < 0.3:
+            t = font.render("Shutting down.", False, (0, 0, 0))
+        elif d % 0.9 < 0.6:
+            t = font.render("Shutting down..", False, (0, 0, 0))
+        else:
+            t = font.render("Shutting down...", False, (0, 0, 0))
+        self.screen.blit(t, (
+            self.width // 9,
+            self.height // 30 - t.get_height() // 2,
+        ))
+
+        # TODO
+        if d < 2.5:
+            message = "Goodbye"
+        else:
+            self._is_ending = False
             return
 
         msg_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//max(11, 1 + len(message) // 2))
@@ -305,6 +342,10 @@ class Display:
 
         if self._is_loading:
             self.draw_loading()
+            self.update()
+            return
+        if self._is_ending:
+            self.draw_ending()
             self.update()
             return
 

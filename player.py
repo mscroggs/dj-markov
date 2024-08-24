@@ -44,6 +44,7 @@ while current is None:
 next = None
 choice_shown = False
 down_for_voice = False
+end = False
 
 current_channel = 0
 ch0.load_file(current["filename"])
@@ -62,14 +63,19 @@ else:
 ch3.load_file("sounds/startup.mp3")
 ch3.play()
 
+"""
 display.show_loading()
+started = False
 while ch3.active or display.is_loading():
+    if ch3.curr_pos > 16 and not started:
+        started = True
+        ch0.play()
+        display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
     display.tick()
+"""
 
-display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
-display.draw_bg()
-display.update()
 ch0.play()
+display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
 
 pressed = []
 
@@ -86,7 +92,10 @@ while True:
             playing = ch1
             queued = ch0
 
-        if next is None:
+        if not playing.active:
+            raise Quit
+
+        if next is None and not end:
             options = songdata[current["song2"]]
             if no_repeats:
                 op = [i for i in options if i["song2"] not in played and "/x" not in i["song2"]]
@@ -102,17 +111,18 @@ while True:
             queued.load_file(next["filename"])
             played.append(next["song2"])
 
-        if playing.curr_pos > current["fade_end"] + 2:
+        if next is not None and playing.curr_pos > current["fade_end"] + 2:
             display.remove_playing()
-            queued.play()
-            queued.seek(current["song2_fade_end"] + playing.curr_pos - current["fade_end"])
-            sleep(0.05)
-            playing.pause()
-            current_channel = 1 - current_channel
-            current = next
+            if next is None:
+                queued.play()
+                queued.seek(current["song2_fade_end"] + playing.curr_pos - current["fade_end"])
+                sleep(0.05)
+                playing.pause()
+                current_channel = 1 - current_channel
+                current = next
+                choice_shown = False
             next = None
-            choice_shown = False
-        elif not choice_shown and playing.curr_pos > current["fade_start"] - 18:
+        elif not choice_shown and current["fade_start"] - 18 < playing.curr_pos:
             choice_shown = True
             options = songdata[current["song1"]]
             displays = [[
@@ -127,9 +137,9 @@ while True:
         while time() < wait_until:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_f]:
-               if pygame.K_f not in pressed:
-                   playing.seek(playing.curr_pos + 15)
-                   pressed.append(pygame.K_f)
+                if pygame.K_f not in pressed:
+                    playing.seek(playing.curr_pos + 15)
+                    pressed.append(pygame.K_f)
             elif pygame.K_f in pressed:
                 pressed.remove(pygame.K_f)
             if not no_repeats:
@@ -140,6 +150,19 @@ while True:
                     down_for_voice = True
                     ch0.set_volume(volumes[1])
                     ch1.set_volume(volumes[1])
+            if keys[pygame.K_k]:
+               if pygame.K_k not in pressed:
+                    if not end:
+                        ch3.load_file("phrases/one-more-song.wav")
+                    else:
+                        ch3.load_file("phrases/many-more-songs.wav")
+                    ch3.play()
+                    end = not end
+                    pressed.append(pygame.K_k)
+            elif pygame.K_k in pressed:
+                pressed.remove(pygame.K_k)
+
+                (pygame.K_4, "phrases/one-more-song.wav", None, True),
 
             dj_buttons = [
                 (pygame.K_z, "keyboard-sounds/DJ.wav", "DJ!", False),
@@ -159,7 +182,6 @@ while True:
                 (pygame.K_p, "phrases/dance.wav", None, True),
                 (pygame.K_1, "phrases/dj2.wav", "DJ!", False),
                 (pygame.K_2, "phrases/dj.wav", "DJ!", False),
-                (pygame.K_4, "phrases/one-more-song.wav", None, True),
                 (pygame.K_5, "phrases/party.wav", None, True),
                 (pygame.K_6, "phrases/robot.wav", None, True),
                 (pygame.K_8, "phrases/the-end.wav", None, True),
@@ -232,3 +254,7 @@ while True:
         ch1.stop()
         ch2.stop()
         display.error(e)
+
+display.show_ending()
+while display.is_ending():
+    display.tick()
