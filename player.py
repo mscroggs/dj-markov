@@ -23,7 +23,56 @@ ch1 = Playback()
 ch2 = Playback()
 ch3 = Playback()
 
-volumes = [0.3, 0.1]
+sass1 = {
+    "music/feastival-all/02.Song_2.mp3": "sass/02_01_woo_hoo.wav",
+    "music/feastival-all/09.Hey_Ya!.mp3": "sass/03_01_commence_shaking.wav",
+    "music/feastival-all/01.Dancing_Queen.mp3": "sass/05_01_you_are_all_dancing_royalty.wav",
+    "music/feastival-all/10.Girls_and_Boys.mp3": "sass/07_01_there_must_be_an_easier_way_to_say_that.wav",
+    "music/feastival-all/04 - The Fresh Prince of Bel-Air.mp3": "sass/08_01_I_bet_none_of_you_know_the_lyrics.wav",
+    "music/feastival-all/01 - YMCA (Original Version 1978).mp3": "sass/10_01_nailed_it.wav",
+    "music/feastival-all/Dont stop me now.mp3": "sass/12_01_no_body_stop_N_E_one.wav",
+    "music/feastival-all/02 - Stayin Alive.mp3": "sass/13_01_In_my_experience_humans_can_ease_illy_be_not_staying_alive.wav",
+    "music/feastival-all/02 - Don't Stop Believin'.mp3": "sass/14_01_every_body_start_believing.wav",
+    "music/feastival-all/03 - Robot Rock.mp3": "sass/15_01_Hey_own_lee_a_robot_can_do_robo_voice_Not_cool.wav",
+    "music/feastival-all/12 - Boom! Shake the Room.mp3": "sass/16_01_boom.wav",
+    "music/feastival-all/03 - Loaded (Edit).mp3": "sass/17_01_what_is_it_with_humans_and_freedom.wav",
+    "music/feastival-all/02 - Breathe.mp3": "sass/18_01_are_you_a_rotated_fire_starter?.wav",
+    "music/feastival-all/(Disc 2) 16 - Love Machine.mp3": "sass/19_01_I_put_the_machine_in_love_machine.wav",
+    "music/feastival-all/14 - Ghostbusters.mp3": "sass/21_01_Robo_DJ.wav",
+    "music/feastival-all/21 Intergalactic.mp3": "sass/22_01_Hey_own_lee_a_robot_can_do_robo_voice_Not_cool.wav",
+    "music/feastival-all/01 99 Problems-Cantina Band.mp3": "sass/23_01_I_don't_know_how_to_feel_about_this.wav",
+    "music/feastival-all/01 - Uptown Funk (Radio Edit).mp3": "sass/24_01_I_believe_you.wav",
+    "music/feastival-all/01 - Smells Like Teen Spirit.mp3": "sass/25_01_All_humans_smell_the_same_to_me.wav",
+    "music/feastival-all/01 - Kids In America.mp3": "sass/26_01_Incorrect_none_of_you_are_in_A_mair_ree_cah.wav",
+    "music/feastival-all/09 - Superstition (Single Version).mp3": "sass/27_01_I_don't_understand_humans.wav",
+    "music/feastival-all/01 - Everybody (Backstreet'\'s Back) (Radio Edit).mp3": "sass/28_01_You_all_have_human_bodies_Rock_them_Right.wav",
+    "music/feastival-all/06 - Toxic.mp3": "sass/29_01_Leave_Brit_knee_alone.wav",
+    "music/feastival-all/04 - Jungle Boogie.mp3": "sass/30_01_You_are_not_getting_sufficient_lee_down.wav",
+    "music/feastival-all/01 - Footloose (From _Footloose_ Soundtrack).mp3": "sass/31_01_Why_do_humans_have_such_loose_feet.wav",
+    "music/feastival-all/01 - Crazy In Love.mp3": "sass/32_01_Robo_DJZ.wav",
+    "music/feastival-all/01 - U Can't Touch This.mp3": "sass/34_01_Hey_don't_touch_anything.wav",
+    "music/feastival-all/05 - Super Freak.mp3": "sass/35_01_all_humans_are_freaky.wav",
+    "music/feastival-all/01 - All Star.mp3": "sass/36_01_all_star.wav",
+    "music/feastival-all/02 - Jump Around [Explicit].mp3": "sass/37_01_jump.wav",
+    "music/feastival-all/02 - The Rockafeller Skank.mp3": "sass/39_01_approximate_lee_now.wav",
+    "music/feastival-all/01 - Canned Heat.mp3": "sass/41_01_dance.wav",
+    "music/feastival-all/08 - All The Small Things.mp3": "sass/42_01_to_me_all_humans_are_small.wav",
+    "music/feastival-all/05 - Year 3000.mp3": "sass/43_01_I've_been_to_the_year_3000_this_song_is_misleading.wav",
+}
+sass2 = {
+    "music/feastival-all/02.Song_2.mp3": "sass/02_02_these_lyrics_make_no_sense.wav",
+    "music/feastival-all/09.Hey_Ya!.mp3": "sass/03_02_zero_degrees_kelvin.wav",
+    "music/feastival-all/Dont stop me now.mp3": "sass/12_02_That's_not_physical_lee_possible.wav",
+    "music/feastival-all/12 - Boom! Shake the Room.mp3": "sass/16_02_shake.wav",
+    "music/feastival-all/01 - Everybody (Backstreet's Back) (Radio Edit).mp3": "sass/28_02_commence_not_caring.wav",
+    "music/feastival-all/06 - Toxic.mp3": "sass/29_02_Humans_find_everything_toxic.wav",
+    "music/feastival-all/01 - Footloose (From _Footloose_ Soundtrack).mp3": "sass/31_02_Honest_lee_human_feet_come_right_off.wav",
+    "music/feastival-all/01 - U Can't Touch This.mp3": "sass/34_02_listen_to_the_human_hammer.wav",
+    "music/feastival-all/01 - All Star.mp3": "sass/36_02_rock_star.wav",
+    "music/feastival-all/02 - Jump Around [Explicit].mp3": "sass/37_02_jump_humans_jump.wav",
+}
+
+volumes = [0.3, 0.2]
 
 ch0.set_volume(volumes[0])
 ch1.set_volume(volumes[0])
@@ -113,7 +162,7 @@ while True:
 
         if next is not None and playing.curr_pos > current["fade_end"] + 2:
             display.remove_playing()
-            if next is None:
+            if not end:
                 queued.play()
                 queued.seek(current["song2_fade_end"] + playing.curr_pos - current["fade_end"])
                 sleep(0.05)
@@ -136,6 +185,29 @@ while True:
         wait_until = time() + 1
         while time() < wait_until:
             keys = pygame.key.get_pressed()
+
+            if keys[pygame.K_b]:
+                if pygame.K_b not in pressed:
+                    if current["song1"] in sass1:
+                        ch3.load_file(f"{sass1[current['song1']]}")
+                        ch3.play()
+                        down_for_voice = True
+                        ch0.set_volume(volumes[1])
+                        ch1.set_volume(volumes[1])
+                    pressed.append(pygame.K_b)
+            elif pygame.K_b in pressed:
+                pressed.remove(pygame.K_b)
+            if keys[pygame.K_PAGEDOWN]:
+                if pygame.K_PAGEDOWN not in pressed:
+                    if current["song1"] in sass2:
+                        ch3.load_file(f"{sass2[current['song1']]}")
+                        ch3.play()
+                        down_for_voice = True
+                        ch0.set_volume(volumes[1])
+                        ch1.set_volume(volumes[1])
+                    pressed.append(pygame.K_PAGEDOWN)
+            elif pygame.K_PAGEDOWN in pressed:
+                pressed.remove(pygame.K_PAGEDOWN)
             if keys[pygame.K_f]:
                 if pygame.K_f not in pressed:
                     playing.seek(playing.curr_pos + 15)
@@ -169,7 +241,6 @@ while True:
                 (pygame.K_x, "keyboard-sounds/Dictionary.wav", "Dictionary", False),
                 (pygame.K_c, "keyboard-sounds/Scratch.wav", None, False),
                 (pygame.K_v, "keyboard-sounds/Scratch2.wav", None, False),
-                (pygame.K_b, "keyboard-sounds/scratch3.wav", None, False),
 
                 (pygame.K_q, "phrases/activating.wav", None, True),
                 (pygame.K_w, "phrases/arm-extend.wav", None, True),
@@ -187,6 +258,8 @@ while True:
                 (pygame.K_8, "phrases/the-end.wav", None, True),
                 (pygame.K_9, "phrases/updates.wav", None, True),
                 (pygame.K_0, "phrases/ending.wav", None, True),
+                (pygame.K_PAGEUP, "phrases/Robo_DJ.wav", None, False),
+                (pygame.K_b, "phrases/Robo_DJ.wav", None, False),
             ]
 
             n = random.choice([
