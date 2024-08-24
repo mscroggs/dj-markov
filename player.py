@@ -23,9 +23,10 @@ ch1 = Playback()
 ch2 = Playback()
 ch3 = Playback()
 
-ch0.set_volume(0.3)
-ch1.set_volume(0.3)
+volumes = [0.3, 0.1]
 
+ch0.set_volume(volumes[0])
+ch1.set_volume(volumes[0])
 
 ch2.load_file("keyboard-sounds/DJ.wav")
 
@@ -38,6 +39,7 @@ while current is None:
 
 next = None
 choice_shown = False
+down_for_voice = False
 
 current_channel = 0
 ch0.load_file(current["filename"])
@@ -120,70 +122,70 @@ while True:
                 pressed.remove(pygame.K_f)
 
             dj_buttons = [
-                (pygame.K_z, "keyboard-sounds/DJ.wav", "DJ!"),
-                (pygame.K_x, "keyboard-sounds/Dictionary.wav", "Dictionary"),
-                (pygame.K_c, "keyboard-sounds/Scratch.wav", None),
-                (pygame.K_v, "keyboard-sounds/Scratch2.wav", None),
-                (pygame.K_b, "keyboard-sounds/scratch3.wav", None),
+                (pygame.K_z, "keyboard-sounds/DJ.wav", "DJ!", False),
+                (pygame.K_x, "keyboard-sounds/Dictionary.wav", "Dictionary", False),
+                (pygame.K_c, "keyboard-sounds/Scratch.wav", None, False),
+                (pygame.K_v, "keyboard-sounds/Scratch2.wav", None, False),
+                (pygame.K_b, "keyboard-sounds/scratch3.wav", None, False),
 
-                (pygame.K_q, "phrases/activating.wav", None),
-                (pygame.K_w, "phrases/arm-extend.wav", None),
-                (pygame.K_e, "phrases/destroy-humans-activated.wav", None),
-                (pygame.K_r, "phrases/destroy-humans-mode-deactivated.wav", None),
-                (pygame.K_t, "phrases/foxdog.wav", None),
-                (pygame.K_y, "phrases/ymca.wav", None),
-                (pygame.K_u, "phrases/hello-matt.wav", None),
-                (pygame.K_o, "phrases/death.wav", None),
-                (pygame.K_p, "phrases/dance.wav", None),
-                (pygame.K_1, "phrases/dj2.wav", "DJ!"),
-                (pygame.K_2, "phrases/dj.wav", "DJ!"),
-                (pygame.K_3, "phrases/no-repeats.wav", None),
-                (pygame.K_4, "phrases/one-more-song.wav", None),
-                (pygame.K_5, "phrases/party.wav", None),
-                (pygame.K_6, "phrases/robot.wav", None),
-                (pygame.K_8, "phrases/the-end.wav", None),
-                (pygame.K_9, "phrases/updates.wav", None),
-                (pygame.K_0, "phrases/ending.wav", None),
+                (pygame.K_q, "phrases/activating.wav", None, True),
+                (pygame.K_w, "phrases/arm-extend.wav", None, True),
+                (pygame.K_e, "phrases/destroy-humans-activated.wav", None, True),
+                (pygame.K_r, "phrases/destroy-humans-mode-deactivated.wav", None, True),
+                (pygame.K_t, "phrases/foxdog.wav", None, True),
+                (pygame.K_y, "phrases/ymca.wav", None, False),
+                (pygame.K_u, "phrases/hello-matt.wav", None, True),
+                (pygame.K_o, "phrases/death.wav", None, True),
+                (pygame.K_p, "phrases/dance.wav", None, True),
+                (pygame.K_1, "phrases/dj2.wav", "DJ!", False),
+                (pygame.K_2, "phrases/dj.wav", "DJ!", False),
+                (pygame.K_3, "phrases/no-repeats.wav", None, True),
+                (pygame.K_4, "phrases/one-more-song.wav", None, True),
+                (pygame.K_5, "phrases/party.wav", None, True),
+                (pygame.K_6, "phrases/robot.wav", None, True),
+                (pygame.K_8, "phrases/the-end.wav", None, True),
+                (pygame.K_9, "phrases/updates.wav", None, True),
+                (pygame.K_0, "phrases/ending.wav", None, True),
             ]
 
             n = random.choice([
-                ("ahhhhh.wav", None),
-                ("BZZhorn.wav", None),
-                ("comeon2.wav", None),
-                ("Comeon.wav", None),
-                ("Dictionary.wav", "Dictionary"),
-                ("DJ.wav", "DJ!"),
-                ("Excellent.wav", "Excellent!"),
-                ("getout.wav", None),
-                ("good.wav", None),
-                ("go.wav", None),
-                ("HEUUUUUUUUUUGH.wav", None),
-                ("horn.wav", None),
-                ("lesson.wav", None),
-                ("OKAY.wav", None),
-                ("onemoretime.wav", None),
-                ("one.wav", None),
-                ("ooowww.wav", None),
-                ("o.wav", None),
-                ("peeeeew.wav", None),
-                ("reversecymbal.wav", None),
-                ("rewind.wav", None),
-                ("Scratch2.wav", None),
-                ("scratch3.wav", None),
-                ("scratchdown.wav", None),
-                ("Scratch.wav", None),
-                ("sonic.wav", None),
-                ("stab2.wav", None),
-                ("stab.wav", None),
-                ("three.wav", None),
-                ("two.wav", None),
-                ("verygood.wav", None),
-                ("wooo.wav", None),
-                ("yeeeeeeeah.wav", None),
+                ("ahhhhh.wav", None, False),
+                ("BZZhorn.wav", None, False),
+                ("comeon2.wav", None, False),
+                ("Comeon.wav", None, False),
+                ("Dictionary.wav", "Dictionary", False),
+                ("DJ.wav", "DJ!", False),
+                ("Excellent.wav", "Excellent!", False),
+                ("getout.wav", None, False),
+                ("good.wav", None, False),
+                ("go.wav", None, False),
+                ("HEUUUUUUUUUUGH.wav", None, False),
+                ("horn.wav", None, False),
+                ("lesson.wav", None, False),
+                ("OKAY.wav", None, False),
+                ("onemoretime.wav", None, False),
+                ("one.wav", None, False),
+                ("ooowww.wav", None, False),
+                ("o.wav", None, False),
+                ("peeeeew.wav", None, False),
+                ("reversecymbal.wav", None, False),
+                ("rewind.wav", None, False),
+                ("Scratch2.wav", None, False),
+                ("scratch3.wav", None, False),
+                ("scratchdown.wav", None, False),
+                ("Scratch.wav", None, False),
+                ("sonic.wav", None, False),
+                ("stab2.wav", None, False),
+                ("stab.wav", None, False),
+                ("three.wav", None, False),
+                ("two.wav", None, False),
+                ("verygood.wav", None, False),
+                ("wooo.wav", None, False),
+                ("yeeeeeeeah.wav", None, False),
             ])
-            dj_buttons.append((pygame.K_n, f"keyboard-sounds/{n[0]}", n[1]))
+            dj_buttons.append((pygame.K_n, f"keyboard-sounds/{n[0]}", n[1], False))
 
-            for key, file, text in dj_buttons:
+            for key, file, text, fade in dj_buttons:
                 if keys[key]:
                     if key not in pressed:
                         ch3.load_file(file)
@@ -191,8 +193,17 @@ while True:
                         if text is not None:
                             display.dj(text)
                         pressed.append(key)
+                        if fade:
+                            down_for_voice = True
+                            ch0.set_volume(volumes[1])
+                            ch1.set_volume(volumes[1])
+
                 elif key in pressed:
                     pressed.remove(key)
+
+            if down_for_voice and not ch3.active:
+                ch0.set_volume(volumes[0])
+                ch1.set_volume(volumes[0])
             display.tick()
 
     except Quit:
