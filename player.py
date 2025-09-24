@@ -82,6 +82,8 @@ ch1.set_volume(volumes[0])
 
 ch2.load_file("keyboard-sounds/DJ.wav")
 
+ready_djed = False
+
 current = None
 while current is None:
     try:
@@ -121,8 +123,8 @@ pygame.mouse.set_visible(False)
 if config.matt2025:
     display.mode = Mode.BLANK
 elif config.startup:
-    ch3.load_file("sounds/startup.mp3")
-    ch3.play()
+    # ch3.load_file("sounds/startup.mp3")
+    # ch3.play()
 
     display.show_loading()
     started = False
@@ -150,11 +152,17 @@ while True:
             ch3.load_file("keyboard-sounds/DJ.wav")
             ch3.play()
             display.dj("DJ!")
-        elif random.random() > 1 - config.dj_rate and not display.is_sleeping:
-            ch2.play()
-            display.dj()
+
+        if not ready_djed and display.mode == Mode.READY:
+            ready_djed = True
+            ch3.load_file("keyboard-sounds/DJ.wav")
+            ch3.play()
+            display.dj("DJ!")
 
         if display.mode == Mode.PLAYING:
+            if random.random() > 1 - config.dj_rate:
+                ch2.play()
+                display.dj()
             if current_channel == 0:
                 playing = ch0
                 queued = ch1
@@ -247,8 +255,8 @@ while True:
                 if keys[pygame.K_SPACE]:
                     if pygame.K_SPACE not in pressed:
                         if display.mode == Mode.BLANK:
-                            display.show_loading()
-                            time_to_dj = random.randrange(25, 200)
+                            display.pause_then_boot()
+                            time_to_dj = random.randrange(40, 300)
                             st = time()
                         elif display.mode == Mode.BOOT:
                             display.mode = Mode.READY
@@ -282,6 +290,7 @@ while True:
                         current_channel = 0
                         ch0.load_file(current["filename"])
 
+                        ready_djed = False
                         next = None
                         choice_shown = False
                         down_for_voice = False

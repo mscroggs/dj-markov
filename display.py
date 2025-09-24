@@ -9,9 +9,25 @@ import pygame
 djblue = (163, 218, 234)
 colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
 
+boot_messages = [
+    "Installing bass",
+    "Enabling kill all humans module",
+    "Setting phasars to DISCO",
+    "Downloading all music",
+    "Turning volume to 11%",
+    "01010000 01000001 01010010 01010100 01011001 00100001",
+    "Updating jazz.dll",
+    "Installing Microsoft Clippy",
+    "Installing Ringo Starr",
+    "Updating tunes",
+    "Downloading C and C#",
+]
+random.shuffle(boot_messages)
+
 
 class Mode(Enum):
     BLANK = 0
+    PAUSE_PRE_BOOT = 0.5
     BOOT = 1
     READY = 2
     PLAYING = 3
@@ -57,6 +73,7 @@ class Display:
         self._queued = None
         self._spinner = None
         self._tran_start = None
+        self._pause_start = None
         self.animation_duration = animation_duration
         self.hold_time = hold_time
         self.playing = []
@@ -68,10 +85,14 @@ class Display:
         self._song_in = time() + self.animation_duration
         self.playing.append([title, artist])
 
+    def pause_then_boot(self):
+        self.mode = Mode.PAUSE_PRE_BOOT
+        self._pause_start = time()
+
     def show_loading(self):
         self.mode = Mode.BOOT
         self._loading_start = time()
-        self._loading_message = [0.5, "Booting"]
+        self._loading_message = [0.5, 0]
         self._loading_colors = [colors[0] for _ in range(13)]
         for i in range(12):
             while self._loading_colors[i] == self._loading_colors[i + 1]:
@@ -304,15 +325,9 @@ class Display:
         ))
 
         if d > self._loading_message[0]:
-            self._loading_message[0] += 0.08
-            self._loading_message[1] = random.choice([
-                "Installing bass",
-                "Enabling kill all humans module",
-                "Setting phasars to DISCO",
-                "Downloading all music",
-                "Turning volume to 11%",
-                "01010000 01000001 01010010 01010100 01011001 00100001",
-            ])
+            self._loading_message[0] += 0.2
+            self._loading_message[1] += 1
+
             if d > 4:
                 self._loading_colors = self._loading_colors[1:]
                 if len(self._loading_colors) == 0:
@@ -326,7 +341,7 @@ class Display:
                 while self._loading_colors[-1] == self._loading_colors[-2]:
                     self._loading_colors[-1] = random.choice(colors)
 
-        message = self._loading_message[1]
+        message = boot_messages[self._loading_message[1] % len(boot_messages)]
 
         msg_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//max(11, 1 + len(message) // 2))
         t = msg_font.render(message, False, (0, 0, 0))
@@ -436,6 +451,12 @@ class Display:
                 raise Quit
 
         self.draw_bg()
+
+        if self.mode == Mode.PAUSE_PRE_BOOT:
+            if time() - self._pause_start > 5:
+                self.show_loading()
+            self.update()
+            return
 
         if self.is_ending:
             self.draw_ending()
