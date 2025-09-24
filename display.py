@@ -72,8 +72,8 @@ class Display:
         self.mode = Mode.BOOT
         self._loading_start = time()
         self._loading_message = [0.5, "Booting"]
-        self._loading_colors = [colors[0] for _ in range(7)]
-        for i in range(6):
+        self._loading_colors = [colors[0] for _ in range(13)]
+        for i in range(12):
             while self._loading_colors[i] == self._loading_colors[i + 1]:
                 self._loading_colors[i + 1] = random.choice(colors)
 
@@ -304,7 +304,7 @@ class Display:
         ))
 
         if d > self._loading_message[0]:
-            self._loading_message[0] += 0.1
+            self._loading_message[0] += 0.08
             self._loading_message[1] = random.choice([
                 "Installing bass",
                 "Enabling kill all humans module",
