@@ -326,8 +326,8 @@ class Display:
             self._sleep_zs.append({
                 "x": self.width / 4 + random.random() * self.width / 2,
                 "y": y + lw,
-                "xsp": random.random() - 0.5,
-                "ysp": 0.5 + 0.5 * random.random(),
+                "xsp": (random.random() - 0.5) * self.width / 500,
+                "ysp": (0.5 + 0.5 * random.random()) * self.width / 500,
                 "size": 1,
                 "char": "z" if random.random() < 0.7 else "ζ"
             })
