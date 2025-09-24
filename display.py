@@ -18,7 +18,7 @@ class Quit(BaseException):
 
 class Display:
     def __init__(
-        self, width=2160, height=3840, kwargs={"flags": pygame.FULLSCREEN, "display": 1},
+        self, width=2160, height=3840, kwargs={"flags": pygame.FULLSCREEN, "display": 0},
         animation_duration = 0.2, hold_time = 2
     ):
         os.environ["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"

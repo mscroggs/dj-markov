@@ -86,10 +86,11 @@ current = None
 while current is None:
     try:
         current = random.choice([i for i in random.choice(list(songdata.values())) if "/x" not in i["song1"] and "/x" not in i["song2"]])
-        if "Ya!" not in current["song1"]:
-            current = None
-        elif "YMCA" not in current["song2"]:
-            current = None
+        if config.hey_ya_ymca:
+            if "Ya!" not in current["song1"]:
+                current = None
+            elif "YMCA" not in current["song2"]:
+                current = None
     except IndexError:
         pass
 
@@ -106,26 +107,32 @@ played = [current["song1"], current["song2"]]
 no_repeats = config.no_repeats
 
 if config.windowed:
-    height = 900
+    height = 1080 if config.height is None else config.height
     width = height * 9 // 16
     display = Display(width, height, {})
 else:
-    display = Display(width=1080, height=1920)
+    display = Display(width=1080 if config.width is None else config.width, height=1920 if config.height is None else config.height)
 
-ch3.load_file("sounds/startup.mp3")
-ch3.play()
+pygame.mouse.set_visible(False)
 
-display.show_loading()
-started = False
-while ch3.active or display.is_loading():
-    if ch3.curr_pos > 16 and not started:
-        started = True
-        ch0.play()
-        display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
-    display.tick()
+if config.startup:
+    ch3.load_file("sounds/startup.mp3")
+    ch3.play()
 
-#ch0.play()
-#display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
+    display.show_loading()
+    started = False
+    while ch3.active or display.is_loading():
+        if ch3.curr_pos > 16 and not started:
+            started = True
+            ch0.play()
+            display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
+        display.tick()
+else:
+    ch0.play()
+    display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
+
+if config.start_later:
+    ch0.seek(current["fade_start"] - 30)
 
 pressed = []
 
