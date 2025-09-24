@@ -115,6 +115,12 @@ else:
 
 display._is_sleeping = config.start_asleep
 
+while display._is_sleeping:
+    if pygame.key.get_pressed()[pygame.K_s]:
+        display._is_sleeping = False
+        break
+    display.tick()
+
 pygame.mouse.set_visible(False)
 
 if config.startup:

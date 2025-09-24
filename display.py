@@ -380,16 +380,16 @@ class Display:
 
         self.draw_bg()
 
-        if self._is_loading:
-            self.draw_loading()
-            self.update()
-            return
         if self._is_ending:
             self.draw_ending()
             self.update()
             return
         if self._is_sleeping:
             self.draw_sleeping()
+            self.update()
+            return
+        if self._is_loading:
+            self.draw_loading()
             self.update()
             return
 
