@@ -16,11 +16,15 @@ boot_messages = [
     "Downloading all music",
     "Turning volume to 11%",
     "01010000 01000001 01010010 01010100 01011001 00100001",
-    "Updating jazz.dll",
-    "Installing Microsoft Clippy",
-    "Installing Ringo Starr",
+    "Deleting jazz.dll",
+    "Installing techno.dll",
+    "Updating Clippy",
+    "Installing RingoStarr.exe",
     "Updating tunes",
-    "Downloading C and C#",
+    "Loading C and C#",
+    "Downloading gui.tar.gz",
+    "Setting fun to maximum",
+    "ALL YOUR BASE ARE BELONG TO ROBO-DJ",
 ]
 random.shuffle(boot_messages)
 
@@ -325,7 +329,7 @@ class Display:
         ))
 
         if d > self._loading_message[0]:
-            self._loading_message[0] += 0.2
+            self._loading_message[0] += 0.4
             self._loading_message[1] += 1
 
             if d > 4:
