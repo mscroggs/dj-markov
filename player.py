@@ -140,7 +140,7 @@ pressed = []
 
 while True:
     try:
-        if random.random() > 1 - config.dj_rate:
+        if random.random() > 1 - config.dj_rate and not display._is_sleeping:
             ch2.play()
             display.dj()
 
