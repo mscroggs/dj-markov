@@ -264,15 +264,15 @@ while True:
                 if pygame.K_s not in pressed:
                     if display._is_sleeping:
                         display._is_sleeping = False
-                        if ch0.paused:
+                        if ch0.paused and ch0.curr_pos > 0.1:
                             ch0.resume()
-                        if ch1.paused:
+                        if ch1.paused and ch1.curr_pos > 0.1:
                             ch1.resume()
                     else:
                         display._is_sleeping = True
-                        if ch0.active:
+                        if ch0.active and ch0.curr_pos > 0.1:
                             ch0.pause()
-                        if ch1.active:
+                        if ch1.active and ch1.curr_pos > 0.1:
                             ch1.pause()
                     pressed.append(pygame.K_s)
             elif pygame.K_s in pressed:
