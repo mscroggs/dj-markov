@@ -5,6 +5,8 @@ import config
 from time import sleep, time
 import pygame
 
+djblue = (163, 218, 234)
+
 
 def pygame_rounded_line(screen, color, p, q, linewidth=4):
     pygame.draw.line(screen, color, p, q, linewidth)
@@ -74,7 +76,10 @@ class Display:
         self._song_out = time() + self.animation_duration
 
     def draw_bg(self):
-        self.screen.fill((163, 218, 234))
+        if self._is_sleeping:
+            self.screen.fill((0, 0, 0))
+        else:
+            self.screen.fill(djblue)
 
     def draw_now_playing(self):
         fontsize = self.width // 30 * 2
@@ -317,7 +322,7 @@ class Display:
         t = big_font.render("A", False, (0, 0, 0))
         y = (self.height - t.get_height()) // 25
         for i, letter in enumerate(config.name):
-            t = big_font.render(letter, False, (0, 0, 0))
+            t = big_font.render(letter, False, djblue)
             self.screen.blit(t, (lstart + lw * i - t.get_width() // 2, y))
 
         self._sleep_zs = [z for z in self._sleep_zs if z["y"] > -30]
@@ -334,7 +339,7 @@ class Display:
 
         for z in self._sleep_zs:
             font = pygame.font.SysFont("Fixedsys Excelsior 3.01", int(fontsize * z["size"] / 10))
-            t = font.render(z["char"], False, (0, 0, 0))
+            t = font.render(z["char"], False, djblue)
             self.screen.blit(t, (int(z["x"]), int(z["y"])))
 
         dt = (time() - self._sleep_t) * 150
