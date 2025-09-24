@@ -25,7 +25,7 @@ Robo-DJ can be configured by editing config.json
 | `name`         | `"Robo-DJ"`   | The name of the robot - will be displayed on screen |
 | `windowed`     | `False`       | Run in windowed mode? |
 | `no-repeats`   | `False`       | Avoid repeats? |
-| `dj-rate`      | `0.01`        | Not sure what this was meant to be for... |
+| `dj-rate`      | `0.01`        | How often is says "DJ" |
 | `startup`      | `False`       | Include start up sequence |
 | `hey_ya_ymca`  | `False`       | Force start to be Hey Ya! followed by YMCA |
 | `start_later`  | `False`       | Start later in first song |
