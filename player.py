@@ -260,6 +260,23 @@ while True:
                     pressed.append(pygame.K_k)
             elif pygame.K_k in pressed:
                 pressed.remove(pygame.K_k)
+            if keys[pygame.K_s]:
+                if pygame.K_s not in pressed:
+                    if display._is_sleeping:
+                        display._is_sleeping = False
+                        if ch0.paused:
+                            ch0.resume()
+                        if ch1.paused:
+                            ch1.resume()
+                    else:
+                        display._is_sleeping = True
+                        if ch0.active:
+                            ch0.pause()
+                        if ch1.active:
+                            ch1.pause()
+                    pressed.append(pygame.K_s)
+            elif pygame.K_s in pressed:
+                pressed.remove(pygame.K_s)
 
             dj_buttons = [
                 (pygame.K_z, "keyboard-sounds/DJ.wav", "DJ!", False),

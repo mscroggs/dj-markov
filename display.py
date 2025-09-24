@@ -25,10 +25,13 @@ class Display:
         self.width = width
         self.height = height
         self._dj_end = 0
+        self._sleep_t = -100
         self._dj_text = "DJ!"
         self._choice_end = 0
         self._choice_in = 0
         self._error = 0
+        self._is_sleeping = False
+        self._sleep_zs = []
         self._is_loading = False
         self._loading_start = 0
         self._is_ending = False
@@ -56,6 +59,9 @@ class Display:
 
     def is_loading(self):
         return self._is_loading
+
+    def is_sleeping(self):
+        return self._is_sleeping
 
     def show_ending(self):
         self._is_ending = True
@@ -302,6 +308,45 @@ class Display:
             self.height // 10 - t.get_height() // 2
         ))
 
+    def draw_sleeping(self):
+        fontsize = self.width // 30 * 2
+        big_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 5 // 2)
+
+        lw = fontsize * 1.3
+        lstart = self.width // 2 - lw * (len(config.name) - 1) / 2
+        t = big_font.render("A", False, (0, 0, 0))
+        y = (self.height - t.get_height()) // 25
+        for i, letter in enumerate(config.name):
+            t = big_font.render(letter, False, (0, 0, 0))
+            self.screen.blit(t, (lstart + lw * i - t.get_width() // 2, y))
+
+        self._sleep_zs = [z for z in self._sleep_zs if z["y"] > -30]
+
+        if len(self._sleep_zs) < 5:
+            self._sleep_zs.append({
+                "x": self.width / 4 + random.random() * self.width / 2,
+                "y": y + lw,
+                "xsp": random.random() - 0.5,
+                "ysp": 0.5 + 0.5 * random.random(),
+                "size": 1,
+                "char": "z" if random.random() < 0.7 else "ζ"
+            })
+
+        for z in self._sleep_zs:
+            font = pygame.font.SysFont("Fixedsys Excelsior 3.01", int(fontsize * z["size"] / 10))
+            t = font.render(z["char"], False, (0, 0, 0))
+            self.screen.blit(t, (int(z["x"]), int(z["y"])))
+
+        dt = (time() - self._sleep_t) * 150
+        self._sleep_t = time()
+        if dt > 10:
+            return
+
+        for z in self._sleep_zs:
+            z["size"] += dt * 0.05
+            z["y"] -= dt * 0.5 * z["ysp"]
+            z["x"] += dt * 0.1 * (z["xsp"] + (random.random() - 0.5))
+
     def draw_ending(self):
         font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//10)
         d = time() - self._ending_start
@@ -341,6 +386,10 @@ class Display:
             return
         if self._is_ending:
             self.draw_ending()
+            self.update()
+            return
+        if self._is_sleeping:
+            self.draw_sleeping()
             self.update()
             return
 
