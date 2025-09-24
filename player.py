@@ -18,6 +18,9 @@ with open(f"out/{config.mode}/data.json") as f:
 with open(f"out/{config.mode}/info.json") as f:
     info = json.load(f)
 
+with open("info.txt") as f:
+    print(f.read())
+
 ch0 = Playback()
 ch1 = Playback()
 ch2 = Playback()
@@ -112,7 +115,6 @@ else:
 ch3.load_file("sounds/startup.mp3")
 ch3.play()
 
-"""
 display.show_loading()
 started = False
 while ch3.active or display.is_loading():
@@ -121,10 +123,9 @@ while ch3.active or display.is_loading():
         ch0.play()
         display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
     display.tick()
-"""
 
-ch0.play()
-display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
+#ch0.play()
+#display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
 
 pressed = []
 
@@ -189,22 +190,35 @@ while True:
             if keys[pygame.K_b]:
                 if pygame.K_b not in pressed:
                     if current["song1"] in sass1:
-                        ch3.load_file(f"{sass1[current['song1']]}")
-                        ch3.play()
-                        down_for_voice = True
-                        ch0.set_volume(volumes[1])
-                        ch1.set_volume(volumes[1])
+                        try:
+                            ch3.load_file(f"{sass1[current['song1']]}")
+                            ch3.play()
+                            down_for_voice = True
+                            ch0.set_volume(volumes[1])
+                            ch1.set_volume(volumes[1])
+                        except:
+                            pass
                     pressed.append(pygame.K_b)
             elif pygame.K_b in pressed:
                 pressed.remove(pygame.K_b)
+            if keys[pygame.K_h]:
+                if pygame.K_h not in pressed:
+                    with open("info.txt") as f:
+                        print(f.read())
+                    pressed.append(pygame.K_h)
+            elif pygame.K_h in pressed:
+                pressed.remove(pygame.K_h)
             if keys[pygame.K_PAGEDOWN]:
                 if pygame.K_PAGEDOWN not in pressed:
                     if current["song1"] in sass2:
-                        ch3.load_file(f"{sass2[current['song1']]}")
-                        ch3.play()
-                        down_for_voice = True
-                        ch0.set_volume(volumes[1])
-                        ch1.set_volume(volumes[1])
+                        try:
+                            ch3.load_file(f"{sass2[current['song1']]}")
+                            ch3.play()
+                            down_for_voice = True
+                            ch0.set_volume(volumes[1])
+                            ch1.set_volume(volumes[1])
+                        except:
+                            pass
                     pressed.append(pygame.K_PAGEDOWN)
             elif pygame.K_PAGEDOWN in pressed:
                 pressed.remove(pygame.K_PAGEDOWN)
@@ -217,24 +231,28 @@ while True:
             if not no_repeats:
                 if keys[pygame.K_l]:
                     no_repeats = True
-                    ch3.load_file("phrases/no-repeats.wav")
-                    ch3.play()
-                    down_for_voice = True
-                    ch0.set_volume(volumes[1])
-                    ch1.set_volume(volumes[1])
+                    try:
+                        ch3.load_file("phrases/no-repeats.wav")
+                        ch3.play()
+                        down_for_voice = True
+                        ch0.set_volume(volumes[1])
+                        ch1.set_volume(volumes[1])
+                    except:
+                        pass
             if keys[pygame.K_k]:
                if pygame.K_k not in pressed:
-                    if not end:
-                        ch3.load_file("phrases/one-more-song.wav")
-                    else:
-                        ch3.load_file("phrases/many-more-songs.wav")
-                    ch3.play()
-                    end = not end
+                    try:
+                        if not end:
+                            ch3.load_file("phrases/one-more-song.wav")
+                        else:
+                            ch3.load_file("phrases/many-more-songs.wav")
+                        ch3.play()
+                        end = not end
+                    except:
+                        pass
                     pressed.append(pygame.K_k)
             elif pygame.K_k in pressed:
                 pressed.remove(pygame.K_k)
-
-                (pygame.K_4, "phrases/one-more-song.wav", None, True),
 
             dj_buttons = [
                 (pygame.K_z, "keyboard-sounds/DJ.wav", "DJ!", False),
@@ -302,15 +320,18 @@ while True:
             for key, file, text, fade in dj_buttons:
                 if keys[key]:
                     if key not in pressed:
-                        ch3.load_file(file)
-                        ch3.play()
-                        if text is not None:
-                            display.dj(text)
-                        pressed.append(key)
-                        if fade:
-                            down_for_voice = True
-                            ch0.set_volume(volumes[1])
-                            ch1.set_volume(volumes[1])
+                        try:
+                            ch3.load_file(file)
+                            ch3.play()
+                            if text is not None:
+                                display.dj(text)
+                            pressed.append(key)
+                            if fade:
+                                down_for_voice = True
+                                ch0.set_volume(volumes[1])
+                                ch1.set_volume(volumes[1])
+                        except:
+                            pass
 
                 elif key in pressed:
                     pressed.remove(key)
@@ -328,6 +349,16 @@ while True:
         ch2.stop()
         display.error(e)
 
+st = time()
 display.show_ending()
-while display.is_ending():
+while time() - st < 5:
+    display.tick()
+
+try:
+    ch3.load_file("")
+    ch3.play("phrases/the-end.wav")
+except:
+    pass
+
+while ch3.active:
     display.tick()

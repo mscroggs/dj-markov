@@ -286,9 +286,9 @@ class Display:
         elif d < 10.5:
             message = "Throwing shapes"
         elif d < 11.5:
-            message = "Setting volume to maximum"
+            message = "Increasing volume to maximum level"
         elif d < 12.5:
-            message = "Setting volume to APPROPRIATE"
+            message = "Decreasing volume to appropriate level"
         elif d < 17:
             message = "Activating dance appendages"
         else:
@@ -316,12 +316,7 @@ class Display:
             self.height // 30 - t.get_height() // 2,
         ))
 
-        # TODO
-        if d < 2.5:
-            message = "Goodbye"
-        else:
-            self._is_ending = False
-            return
+        message = "Goodbye"
 
         msg_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//max(11, 1 + len(message) // 2))
         t = msg_font.render(message, False, (0, 0, 0))
