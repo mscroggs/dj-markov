@@ -6,14 +6,15 @@ try:
 except:
     config = {}
 
-mode = config["mode"] if "mode" in config else "demo"
-name = config["name"] if "name" in config else "Robo-DJ"
-windowed = config["windowed"] if "windowed" in config else False
-no_repeats = config["no-repeats"] if "no-repeats" in config else False
-dj_rate = config["dj-rate"] if "dj-rate" in config else 0.01
-startup = config["startup"] if "startup" in config else False
-hey_ya_ymca = config["hey_ya_ymca"] if "hey_ya_ymca" in config else False
-start_later = config["start_later"] if "start_later" in config else False
-width = config["width"] if "width" in config else None
-height = config["height"] if "height" in config else None
-start_asleep = config["start_asleep"] if "start_asleep" in config else False
+mode = config.get("mode", "demo")
+name = config.get("name", "Robo-DJ")
+windowed = config.get("windowed", False)
+no_repeats = config.get("no-repeats", False)
+dj_rate = config.get("dj-rate", 0.01)
+startup = config.get("startup", False)
+hey_ya_ymca = config.get("hey_ya_ymca", False)
+start_later = config.get("start_later", False)
+width = config.get("width", None)
+height = config.get("height", None)
+start_asleep = config.get("start_asleep", False)
+matt2025 = config.get("matt2025", False)

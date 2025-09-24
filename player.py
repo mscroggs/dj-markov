@@ -5,7 +5,7 @@ import sys
 import random
 import config
 from time import time, sleep
-from display import Display, Quit
+from display import Display, Quit, Mode
 from just_playback import Playback
 
 songdata = {}
@@ -113,23 +113,48 @@ if config.windowed:
 else:
     display = Display(width=1080 if config.width is None else config.width, height=1920 if config.height is None else config.height)
 
-display._is_sleeping = config.start_asleep
+if config.start_asleep:
+    raise NotImplementedError()
 
 pygame.mouse.set_visible(False)
 
-while display._is_sleeping:
-    if pygame.key.get_pressed()[pygame.K_s]:
-        display._is_sleeping = False
-        break
-    display.tick()
+if config.matt2025:
+    display.mode = Mode.BLANK
+    pressed = False
+    while not pressed:
+        pressed = pygame.key.get_pressed()[pygame.K_SPACE]
+        display.tick()
+    display.show_loading()
+    while display.is_loading:
+        display.tick()
 
-if config.startup:
+    time_to_dj = random.randrange(20, 200)
+    djed = False
+    st = time()
+
+    display.show_ready()
+    pressed = False
+    while not pressed:
+        if not djed and time() - st > time_to_dj:
+            djed = True
+            ch3.load_file("keyboard-sounds/DJ.wav")
+            ch3.play()
+            display.dj("DJ!")
+        pressed = pygame.key.get_pressed()[pygame.K_SPACE]
+        display.tick()
+
+    display.mode = Mode.PLAYING
+
+    ch0.play()
+    display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
+
+elif config.startup:
     ch3.load_file("sounds/startup.mp3")
     ch3.play()
 
     display.show_loading()
     started = False
-    while ch3.active or display.is_loading():
+    while ch3.active or display.is_loading:
         if ch3.curr_pos > 16 and not started:
             started = True
             ch0.play()
@@ -146,7 +171,7 @@ pressed = []
 
 while True:
     try:
-        if random.random() > 1 - config.dj_rate and not display._is_sleeping:
+        if random.random() > 1 - config.dj_rate and not display.is_sleeping:
             ch2.play()
             display.dj()
 
@@ -270,14 +295,15 @@ while True:
                 pressed.remove(pygame.K_k)
             if keys[pygame.K_s]:
                 if pygame.K_s not in pressed:
-                    if display._is_sleeping:
-                        display._is_sleeping = False
+                    if display.is_sleeping:
+                        display.mode = pre_sleep
                         if ch0.paused and ch0.curr_pos > 0.1:
                             ch0.resume()
                         if ch1.paused and ch1.curr_pos > 0.1:
                             ch1.resume()
                     else:
-                        display._is_sleeping = True
+                        pre_sleep = display.mode
+                        display.mode = Mode.SLEEP
                         if ch0.active and ch0.curr_pos > 0.1:
                             ch0.pause()
                         if ch1.active and ch1.curr_pos > 0.1:

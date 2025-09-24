@@ -1,3 +1,4 @@
+from enum import Enum
 import os
 import random
 import numpy as np
@@ -6,6 +7,16 @@ from time import sleep, time
 import pygame
 
 djblue = (163, 218, 234)
+colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
+
+
+class Mode(Enum):
+    BLANK = 0
+    BOOT = 1
+    READY = 2
+    PLAYING = 3
+    SLEEP = 4
+    END = 5
 
 
 def pygame_rounded_line(screen, color, p, q, linewidth=4):
@@ -26,17 +37,19 @@ class Display:
         os.environ["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
         self.width = width
         self.height = height
+        self.mode = None
         self._dj_end = 0
+        self._loading_message = None
+        self._loading_colors = None
         self._sleep_t = -100
+        self._blank_char = 0
+        self._blank_t = -100
         self._dj_text = "DJ!"
         self._choice_end = 0
         self._choice_in = 0
         self._error = 0
-        self._is_sleeping = False
         self._sleep_zs = []
-        self._is_loading = False
         self._loading_start = 0
-        self._is_ending = False
         self._ending_start = 0
         self._next_song = 0
         self._song_in = None
@@ -56,27 +69,46 @@ class Display:
         self.playing.append([title, artist])
 
     def show_loading(self):
-        self._is_loading = True
+        self.mode = Mode.BOOT
         self._loading_start = time()
+        self._loading_message = [0.5, "Booting"]
+        self._loading_colors = [colors[0] for _ in range(7)]
+        for i in range(6):
+            while self._loading_colors[i] == self._loading_colors[i + 1]:
+                self._loading_colors[i + 1] = random.choice(colors)
 
+    def show_ready(self):
+        self.mode = Mode.READY
+
+    @property
     def is_loading(self):
-        return self._is_loading
+        return self.mode == Mode.BOOT
 
+    @property
+    def is_ready(self):
+        return self.mode == Mode.READY
+
+    @property
     def is_sleeping(self):
-        return self._is_sleeping
+        return self.mode == Mode.SLEEP
+
+    @property
+    def is_blank(self):
+        return self.mode == Mode.BLANK
 
     def show_ending(self):
-        self._is_ending = True
+        self.mode = Mode.END
         self._ending_start = time()
 
+    @property
     def is_ending(self):
-        return self._is_ending
+        return self.mode == Mode.END
 
     def remove_playing(self):
         self._song_out = time() + self.animation_duration
 
     def draw_bg(self):
-        if self._is_sleeping:
+        if self.is_sleeping or self.is_blank:
             self.screen.fill((0, 0, 0))
         else:
             self.screen.fill(djblue)
@@ -265,46 +297,36 @@ class Display:
     def draw_loading(self):
         font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//10)
         d = time() - self._loading_start
-        if d % 0.9 < 0.3:
-            t = font.render("Initialising.", False, (0, 0, 0))
-        elif d % 0.9 < 0.6:
-            t = font.render("Initialising..", False, (0, 0, 0))
-        else:
-            t = font.render("Initialising...", False, (0, 0, 0))
+        t = font.render("Initialising.", False, (0, 0, 0))
         self.screen.blit(t, (
             self.width // 9,
             self.height // 30 - t.get_height() // 2,
         ))
 
-        if d < 0.5:
-            message = "Installing update 1 of 1000"
-        elif d < 1:
-            message = "Installing update 2 of 1000"
-        elif d < 1.3:
-            message = "Installing update 3 of 1000"
-        elif d < 5:
-            message = "Installing update 4 of 1000"
-        elif d < 6:
-            message = "Updates cancelled"
-        elif d < 7:
-            message = "Initialising bass"
-        elif d < 8:
-            message = "Setting freshness to maximum"
-        elif d < 9:
-            message = "Enabling kill all humans module"
-        elif d < 9.5:
-            message = "Setting phasars to DISCO"
-        elif d < 10.5:
-            message = "Throwing shapes"
-        elif d < 11.5:
-            message = "Increasing volume to maximum level"
-        elif d < 12.5:
-            message = "Decreasing volume to appropriate level"
-        elif d < 17:
-            message = "Activating dance appendages"
-        else:
-            self._is_loading = False
-            return
+        if d > self._loading_message[0]:
+            self._loading_message[0] += 0.1
+            self._loading_message[1] = random.choice([
+                "Installing bass",
+                "Enabling kill all humans module",
+                "Setting phasars to DISCO",
+                "Downloading all music",
+                "Turning volume to 11%",
+                "01010000 01000001 01010010 01010100 01011001 00100001",
+            ])
+            if d > 4:
+                self._loading_colors = self._loading_colors[1:]
+                if len(self._loading_colors) == 0:
+                    self.draw_bg()
+                    self.update()
+                    sleep(0.5)
+                    self.mode = Mode.PLAYING
+                    return
+            else:
+                self._loading_colors = self._loading_colors[1:] + [random.choice(colors)]
+                while self._loading_colors[-1] == self._loading_colors[-2]:
+                    self._loading_colors[-1] = random.choice(colors)
+
+        message = self._loading_message[1]
 
         msg_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//max(11, 1 + len(message) // 2))
         t = msg_font.render(message, False, (0, 0, 0))
@@ -312,6 +334,9 @@ class Display:
             (self.width - t.get_width()) // 2,
             self.height // 10 - t.get_height() // 2
         ))
+
+        for i, c in enumerate(self._loading_colors):
+            self.screen.fill(c, pygame.Rect(0, self.height - i * (self.height // 14), self.width, self.height // 14))
 
     def draw_sleeping(self):
         fontsize = self.width // 30 * 2
@@ -325,7 +350,7 @@ class Display:
             t = big_font.render(letter, False, djblue)
             self.screen.blit(t, (lstart + lw * i - t.get_width() // 2, y))
 
-        self._sleep_zs = [z for z in self._sleep_zs if z["y"] > -30]
+        self._sleep_zs = [z for z in self._sleep_zs if z["y"] > -80]
 
         if len(self._sleep_zs) < 5:
             self._sleep_zs.append({
@@ -351,6 +376,33 @@ class Display:
             z["size"] += dt * 0.05
             z["y"] -= dt * 0.5 * z["ysp"]
             z["x"] += dt * 0.1 * (z["xsp"] + (random.random() - 0.5))
+
+    def draw_ready(self):
+        fontsize = self.width // 30 * 2
+        font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize)
+        middle_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 5 // 4)
+        medium_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 2)
+        big_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 5 // 2)
+        lw = fontsize * 1.3
+        lstart = self.width // 2 - lw * (len(config.name) - 1) / 2
+        for i, letter in enumerate(config.name):
+            t = big_font.render(letter, False, (0, 0, 0))
+            y = (self.height - t.get_height()) // 25 - self.height // 15 * np.sin(2 * (time() - i / 16)) ** 20
+            self.screen.blit(t, (lstart + lw * i - t.get_width() // 2, y))
+
+        t = medium_font.render("Ready", False, (0, 0, 0))
+        self.screen.blit(t, ((self.width - t.get_width()) // 2, (self.height - t.get_height()) // 25 + fontsize * 4))
+
+    def draw_blank(self):
+        chars = "/-\\|"
+        if time() > self._blank_t + 0.5:
+            self._blank_char += 1
+            self._blank_t = time()
+        fontsize = self.width // 30 * 2
+        big_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize)
+
+        t = big_font.render(chars[self._blank_char % len(chars)], False, djblue)
+        self.screen.blit(t, (self.width - t.get_width(), self.height - t.get_height()))
 
     def draw_ending(self):
         font = pygame.font.SysFont("Fixedsys Excelsior 3.01", self.width//10)
@@ -385,16 +437,26 @@ class Display:
 
         self.draw_bg()
 
-        if self._is_ending:
+        if self.is_ending:
             self.draw_ending()
             self.update()
             return
-        if self._is_sleeping:
+        if self.is_sleeping:
             self.draw_sleeping()
             self.update()
             return
-        if self._is_loading:
+        if self.is_blank:
+            self.draw_blank()
+            self.update()
+            return
+        if self.is_loading:
             self.draw_loading()
+            self.update()
+            return
+        if self.is_ready:
+            self.draw_ready()
+            if time() < self._dj_end:
+                self.draw_dj()
             self.update()
             return
 

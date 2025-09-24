@@ -32,3 +32,4 @@ Robo-DJ can be configured by editing config.json
 | `width`        | `None`        | Width of screen |
 | `height`       | `None`        | Height of screen |
 | `start_asleep` | `False`       | Boot up already asleep |
+| `matt2025`     | `False`       | Features for Matt's 2025 tour |
