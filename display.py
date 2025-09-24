@@ -319,7 +319,7 @@ class Display:
                     self.draw_bg()
                     self.update()
                     sleep(0.5)
-                    self.mode = Mode.PLAYING
+                    self.mode = Mode.READY
                     return
             else:
                 self._loading_colors = self._loading_colors[1:] + [random.choice(colors)]

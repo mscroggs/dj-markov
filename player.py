@@ -120,34 +120,6 @@ pygame.mouse.set_visible(False)
 
 if config.matt2025:
     display.mode = Mode.BLANK
-    pressed = False
-    while not pressed:
-        pressed = pygame.key.get_pressed()[pygame.K_SPACE]
-        display.tick()
-    display.show_loading()
-    while display.is_loading:
-        display.tick()
-
-    time_to_dj = random.randrange(20, 200)
-    djed = False
-    st = time()
-
-    display.show_ready()
-    pressed = False
-    while not pressed:
-        if not djed and time() - st > time_to_dj:
-            djed = True
-            ch3.load_file("keyboard-sounds/DJ.wav")
-            ch3.play()
-            display.dj("DJ!")
-        pressed = pygame.key.get_pressed()[pygame.K_SPACE]
-        display.tick()
-
-    display.mode = Mode.PLAYING
-
-    ch0.play()
-    display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
-
 elif config.startup:
     ch3.load_file("sounds/startup.mp3")
     ch3.play()
@@ -169,59 +141,67 @@ if config.start_later:
 
 pressed = []
 
+time_to_dj = None
+
 while True:
     try:
-        if random.random() > 1 - config.dj_rate and not display.is_sleeping:
+        if time_to_dj is not None and time() - st > time_to_dj:
+            time_to_dj = None
+            ch3.load_file("keyboard-sounds/DJ.wav")
+            ch3.play()
+            display.dj("DJ!")
+        elif random.random() > 1 - config.dj_rate and not display.is_sleeping:
             ch2.play()
             display.dj()
 
-        if current_channel == 0:
-            playing = ch0
-            queued = ch1
-        else:
-            playing = ch1
-            queued = ch0
+        if display.mode == Mode.PLAYING:
+            if current_channel == 0:
+                playing = ch0
+                queued = ch1
+            else:
+                playing = ch1
+                queued = ch0
 
-        if not playing.active:
-            raise Quit
+            if not playing.active:
+                raise Quit
 
-        if next is None and not end:
-            options = songdata[current["song2"]]
-            if no_repeats:
-                op = [i for i in options if i["song2"] not in played and "/x" not in i["song2"]]
-                if len(op) > 0:
-                    options = op
-                else:
-                    op = [i for i in options if i["song2"] not in played]
+            if next is None and not end:
+                options = songdata[current["song2"]]
+                if no_repeats:
+                    op = [i for i in options if i["song2"] not in played and "/x" not in i["song2"]]
                     if len(op) > 0:
                         options = op
-            weights = np.array([i["rating"] for i in options])
-            weights /= sum(weights)
-            next = np.random.choice(options, p=weights)
-            queued.load_file(next["filename"])
-            played.append(next["song2"])
+                    else:
+                        op = [i for i in options if i["song2"] not in played]
+                        if len(op) > 0:
+                            options = op
+                weights = np.array([i["rating"] for i in options])
+                weights /= sum(weights)
+                next = np.random.choice(options, p=weights)
+                queued.load_file(next["filename"])
+                played.append(next["song2"])
 
-        if next is not None and playing.curr_pos > current["fade_end"] + 2:
-            display.remove_playing()
-            if not end:
-                queued.play()
-                queued.seek(current["song2_fade_end"] + playing.curr_pos - current["fade_end"])
-                sleep(0.05)
-                playing.pause()
-                current_channel = 1 - current_channel
-                current = next
-                choice_shown = False
-            next = None
-        elif not choice_shown and current["fade_start"] - 18 < playing.curr_pos:
-            choice_shown = True
-            options = songdata[current["song1"]]
-            displays = [[
-                info[i["song2"]]["title"],
-                info[i["song2"]]["artist"],
-            ] for i in options]
-            weights = np.array([i["rating"] for i in options])
-            weights /= sum(weights)
-            display.show_choice(displays, weights, options.index(current), time() - playing.curr_pos + current["fade_start"])
+            if next is not None and playing.curr_pos > current["fade_end"] + 2:
+                display.remove_playing()
+                if not end:
+                    queued.play()
+                    queued.seek(current["song2_fade_end"] + playing.curr_pos - current["fade_end"])
+                    sleep(0.05)
+                    playing.pause()
+                    current_channel = 1 - current_channel
+                    current = next
+                    choice_shown = False
+                next = None
+            elif not choice_shown and current["fade_start"] - 18 < playing.curr_pos:
+                choice_shown = True
+                options = songdata[current["song1"]]
+                displays = [[
+                    info[i["song2"]]["title"],
+                    info[i["song2"]]["artist"],
+                ] for i in options]
+                weights = np.array([i["rating"] for i in options])
+                weights /= sum(weights)
+                display.show_choice(displays, weights, options.index(current), time() - playing.curr_pos + current["fade_start"])
 
         wait_until = time() + 1
         while time() < wait_until:
@@ -262,6 +242,62 @@ while True:
                     pressed.append(pygame.K_PAGEDOWN)
             elif pygame.K_PAGEDOWN in pressed:
                 pressed.remove(pygame.K_PAGEDOWN)
+
+            if config.matt2025:
+                if keys[pygame.K_SPACE]:
+                    if pygame.K_SPACE not in pressed:
+                        if display.mode == Mode.BLANK:
+                            display.show_loading()
+                            time_to_dj = random.randrange(25, 200)
+                            st = time()
+                        elif display.mode == Mode.BOOT:
+                            display.mode = Mode.READY
+                        elif display.mode == Mode.READY:
+                            display.mode = Mode.PLAYING
+                            ch0.play()
+                            display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
+                        elif display.mode == Mode.SLEEP:
+                            display.mode = pre_sleep
+                            if ch0.paused and ch0.curr_pos > 0.1:
+                                ch0.resume()
+                            if ch1.paused and ch1.curr_pos > 0.1:
+                                ch1.resume()
+                        elif display.mode == Mode.PLAYING:
+                            pre_sleep = display.mode
+                            display.mode = Mode.SLEEP
+                            if ch0.active and ch0.curr_pos > 0.1:
+                                ch0.pause()
+                            if ch1.active and ch1.curr_pos > 0.1:
+                                ch1.pause()
+
+                    pressed.append(pygame.K_SPACE)
+                elif pygame.K_SPACE in pressed:
+                    pressed.remove(pygame.K_SPACE)
+                if keys[pygame.K_m]:
+                    if pygame.K_m not in pressed:
+                        display.mode = Mode.BLANK
+                        ch0.stop()
+                        ch1.stop()
+                        current = random.choice([i for i in random.choice(list(songdata.values())) if "/x" not in i["song1"] and "/x" not in i["song2"]])
+                        current_channel = 0
+                        ch0.load_file(current["filename"])
+
+                        next = None
+                        choice_shown = False
+                        down_for_voice = False
+                        end = False
+                        time_to_dj = None
+                        display.playing = []
+
+                        ch0.set_volume(volumes[0])
+                        ch1.set_volume(volumes[0])
+
+                        played = [current["song1"], current["song2"]]
+
+                    pressed.append(pygame.K_m)
+                elif pygame.K_m in pressed:
+                    pressed.remove(pygame.K_m)
+
             if keys[pygame.K_f]:
                 if pygame.K_f not in pressed:
                     playing.seek(playing.curr_pos + 15)
