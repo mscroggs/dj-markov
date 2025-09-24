@@ -113,6 +113,8 @@ if config.windowed:
 else:
     display = Display(width=1080 if config.width is None else config.width, height=1920 if config.height is None else config.height)
 
+display._is_sleeping = config.start_asleep
+
 pygame.mouse.set_visible(False)
 
 if config.startup:

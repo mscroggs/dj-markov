@@ -16,3 +16,4 @@ hey_ya_ymca = config["hey_ya_ymca"] if "hey_ya_ymca" in config else False
 start_later = config["start_later"] if "start_later" in config else False
 width = config["width"] if "width" in config else None
 height = config["height"] if "height" in config else None
+start_asleep = config["start_asleep"] if "start_asleep" in config else False
