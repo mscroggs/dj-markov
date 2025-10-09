@@ -256,7 +256,7 @@ while True:
                     if pygame.K_SPACE not in pressed:
                         if display.mode == Mode.BLANK:
                             display.pause_then_boot()
-                            time_to_dj = random.randrange(40, 300)
+                            time_to_dj = random.randrange(20, 100)
                             st = time()
                         elif display.mode == Mode.BOOT:
                             display.mode = Mode.READY
