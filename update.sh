@@ -1,2 +1,2 @@
 git pull
-sudo cp -r www /var/www/html
+sudo cp -r www/* /var/www/html
