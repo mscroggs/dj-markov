@@ -37,7 +37,7 @@ class Mode(Enum):
     PLAYING = 3
     SLEEP = 4
     END = 5
-
+    CHILL = 6
 
 def pygame_rounded_line(screen, color, p, q, linewidth=4):
     pygame.draw.line(screen, color, p, q, linewidth)
@@ -116,6 +116,10 @@ class Display:
     @property
     def is_sleeping(self):
         return self.mode == Mode.SLEEP
+
+    @property
+    def is_chilling(self):
+        return self.mode == Mode.CHILL
 
     @property
     def is_blank(self):
@@ -396,6 +400,34 @@ class Display:
             z["y"] -= dt * 0.5 * z["ysp"]
             z["x"] += dt * 0.1 * (z["xsp"] + (random.random() - 0.5))
 
+    def draw_chilling(self):
+        fontsize = self.width // 30 * 2
+        font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize)
+        middle_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 5 // 4)
+        medium_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 2)
+        big_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize * 5 // 2)
+        lw = fontsize * 1.3
+        lstart = self.width // 2 - lw * (len(config.name) - 1) / 2
+        for i, letter in enumerate(config.name):
+            t = big_font.render(letter, False, (0, 0, 0))
+            y = (self.height - t.get_height()) // 25 - self.height // 15 * np.sin(2 * (time() - i / 16)) ** 20
+            self.screen.blit(t, (lstart + lw * i - t.get_width() // 2, y))
+
+        self._tran_start = None
+        t = medium_font.render("Now playing", False, (0, 0, 0))
+        self.screen.blit(t, ((self.width - t.get_width()) // 2, (self.height - t.get_height()) // 25 + fontsize * 4))
+
+        x0 = self.width / 2
+        y0 = self.height / 25 + fontsize * 6.5
+        x1 = self.width / 2
+        y1 = self.height / 25 + fontsize * 9.5
+
+        title_font = pygame.font.SysFont("Fixedsys Excelsior 3.01", min(
+            fontsize, self.width // len("Chill Summer Lo-Fi Mix") * 2
+        ))
+        t = title_font.render("Chill Summer Lo-Fi Mix", False, (0, 0, 0))
+        self.screen.blit(t, (x0 - t.get_width() / 2, y0- t.get_height() / 2))
+
     def draw_ready(self):
         fontsize = self.width // 30 * 2
         font = pygame.font.SysFont("Fixedsys Excelsior 3.01", fontsize)
@@ -468,6 +500,10 @@ class Display:
             return
         if self.is_sleeping:
             self.draw_sleeping()
+            self.update()
+            return
+        if self.is_chilling:
+            self.draw_chilling()
             self.update()
             return
         if self.is_blank:

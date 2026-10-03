@@ -8,15 +8,20 @@ from time import time, sleep
 from display import Display, Quit, Mode
 from just_playback import Playback
 
-songdata = {}
-with open(f"out/{config.mode}/data.json") as f:
-    for line in f:
-        data = json.loads(line)
-        if data["song1"] not in songdata:
-            songdata[data["song1"]] = []
-        songdata[data["song1"]].append(data)
-with open(f"out/{config.mode}/info.json") as f:
-    info = json.load(f)
+
+def load_songs(mode):
+    songdata = {}
+    with open(f"out/{mode}/data.json") as f:
+        for line in f:
+            data = json.loads(line)
+            if data["song1"] not in songdata:
+                songdata[data["song1"]] = []
+            songdata[data["song1"]].append(data)
+    with open(f"out/{mode}/info.json") as f:
+        info = json.load(f)
+    return songdata, info
+
+songdata, info = load_songs(config.mode)
 
 with open("info.txt") as f:
     print(f.read())
@@ -144,6 +149,7 @@ if config.start_later:
 pressed = []
 
 time_to_dj = None
+dj_rate = config.dj_rate
 
 while True:
     try:
@@ -160,7 +166,7 @@ while True:
             display.dj("DJ!")
 
         if display.mode == Mode.PLAYING:
-            if random.random() > 1 - config.dj_rate:
+            if random.random() > 1 - dj_rate:
                 ch2.play()
                 display.dj()
             if current_channel == 0:
@@ -286,7 +292,12 @@ while True:
                         display.mode = Mode.BLANK
                         ch0.stop()
                         ch1.stop()
-                        current = random.choice([i for i in random.choice(list(songdata.values())) if "/x" not in i["song1"] and "/x" not in i["song2"]])
+                        current = None
+                        while current is None:
+                            try:
+                                current = random.choice([i for i in random.choice(list(songdata.values())) if "/x" not in i["song1"] and "/x" not in i["song2"]])
+                            except IndexError:
+                                pass
                         current_channel = 0
                         ch0.load_file(current["filename"])
 
@@ -309,7 +320,8 @@ while True:
 
             if keys[pygame.K_f]:
                 if pygame.K_f not in pressed:
-                    playing.seek(playing.curr_pos + 15)
+                    if display.mode == Mode.PLAYING:
+                        playing.seek(playing.curr_pos + 15)
                     pressed.append(pygame.K_f)
             elif pygame.K_f in pressed:
                 pressed.remove(pygame.K_f)
@@ -356,6 +368,140 @@ while True:
                     pressed.append(pygame.K_s)
             elif pygame.K_s in pressed:
                 pressed.remove(pygame.K_s)
+
+            if keys[pygame.K_j]:
+                if pygame.K_j not in pressed:
+                    songdata, info = load_songs("grime-wedding-chill")
+                    no_repeats = True
+                    dj_rate = -1
+                    current = None
+                    while current is None:
+                        try:
+                            current = random.choice([i for i in random.choice(list(songdata.values())) if "/x" not in i["song1"] and "/x" not in i["song2"]])
+                        except IndexError:
+                            pass
+                    current_channel = 0
+                    next = None
+                    choice_shown = False
+                    down_for_voice = False
+                    end = False
+
+                    current_channel = 0
+                    ch0.load_file(current["filename"])
+
+                    played = [current["song1"], current["song2"]]
+
+                    no_repeats = True
+                    display.mode = Mode.PLAYING
+                    started = True
+                    ch0.play()
+                    display.playing = []
+                    display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
+
+                    playing = ch0
+                    queued = ch1
+
+                    ch1.pause()
+
+                    pressed.append(pygame.K_j)
+            elif pygame.K_j in pressed:
+                pressed.remove(pygame.K_j)
+
+            if keys[pygame.K_g]:
+                if pygame.K_g not in pressed:
+                    pressed.append(pygame.K_g)
+                    dj_rate = -1
+                    ch0.pause()
+                    ch1.pause()
+                    ch0.load_file("music/summer-lofi.mp3")
+                    display.mode = Mode.CHILL
+                    ch0.play()
+            elif pygame.K_g in pressed:
+                pressed.remove(pygame.K_g)
+
+
+            if keys[pygame.K_3]:
+                if pygame.K_3 not in pressed:
+                    pressed.append(pygame.K_3)
+                    no_repeats = True
+
+                    pressed.append(pygame.K_3)
+                    songdata, info = load_songs(config.mode)
+
+                    dj_rate = config.dj_rate
+
+                    current = None
+                    while current is None:
+                        try:
+                            current = random.choice([i for i in random.choice(list(songdata.values())) if "/x" not in i["song1"] and "/x" not in i["song2"]])
+                            if "Thing_Called" not in current["song1"]:
+                                current = None
+
+                        except IndexError:
+                            pass
+
+                    next = None
+                    choice_shown = False
+                    down_for_voice = False
+                    end = False
+
+                    current_channel = 0
+                    ch0.load_file(current["filename"])
+
+                    played = [current["song1"], current["song2"]]
+
+                    no_repeats = True
+                    display.mode = Mode.PLAYING
+                    started = True
+                    ch0.play()
+                    display.playing = []
+                    display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
+
+                    playing = ch0
+                    queued = ch1
+
+                    ch1.pause()
+            elif pygame.K_3 in pressed:
+                pressed.remove(pygame.K_3)
+
+            if keys[pygame.K_4]:
+                if pygame.K_4 not in pressed:
+                    pressed.append(pygame.K_4)
+                    no_repeats = False
+                    songdata, info = load_songs(config.mode)
+
+                    dj_rate = config.dj_rate
+
+                    current = None
+                    while current is None:
+                        try:
+                            current = random.choice([i for i in random.choice(list(songdata.values())) if "/x" not in i["song1"] and "/x" not in i["song2"]])
+                        except IndexError:
+                            pass
+
+                    next = None
+                    choice_shown = False
+                    down_for_voice = False
+                    end = False
+
+                    current_channel = 0
+                    ch0.load_file(current["filename"])
+
+                    played = [current["song1"], current["song2"]]
+
+                    no_repeats = True
+                    display.mode = Mode.PLAYING
+                    started = True
+                    ch0.play()
+                    display.playing = []
+                    display.add_playing(info[current["song1"]]["title"], info[current["song1"]]["artist"])
+
+                    playing = ch0
+                    queued = ch1
+
+                    ch1.pause()
+            elif pygame.K_4 in pressed:
+                pressed.remove(pygame.K_4)
 
             dj_buttons = [
                 (pygame.K_z, "keyboard-sounds/DJ.wav", "DJ!", False),
